@@ -1,7 +1,7 @@
 use std::fs::read_to_string;
 
 fn main() {
-	let input: Vec<i64> = read_to_string("day01/input.txt")
+	let input: Vec<i64> = read_to_string("inputs/day01.txt")
 		.unwrap()
 		.trim()
 		.lines()

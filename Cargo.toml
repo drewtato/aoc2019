@@ -1,30 +1,12 @@
-[workspace]
-members = [
-	"day01",
-	"day02",
-	"day03",
-	"day04",
-	"day05",
-	"day06",
-	"day07",
-	"day08",
-	"day09",
-	"day10",
-	"day11",
-	"day12",
-	"day13",
-	"day14",
-	"day15",
-	"day16",
-	"day17",
-	"day18",
-	"day19",
-	"day20",
-	"day21",
-	"day22",
-	"day23",
-	"day24",
-	"day25",
-]
+[package]
+name = "aoc2019"
+version = "0.1.0"
+authors = ["Drewtato <ai@andrewirino.com>"]
+edition = "2018"
 
-default-members = ["day01"]
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[workspace]
+members = ["days/day*"]
+
+[dependencies]
