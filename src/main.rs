@@ -1,4 +1,8 @@
-use std::{env::args, fs::{read_to_string, File, remove_file}, process::Command};
+use std::{
+	env::args,
+	fs::{read_to_string, remove_file, File},
+	process::Command,
+};
 
 const YEAR: u32 = 2019;
 
@@ -16,16 +20,18 @@ fn get_input(day: u8, filename: &str) -> ResultBox<u16> {
 		"session={}",
 		read_to_string("APIKEY").expect("No file called `APIKEY` found")
 	);
-	let out = Command::new("curl").args(&[
-		"-s",
-		"-o",
-		filename,
-		"-w",
-		"%{http_code}",
-		"--cookie",
-		&cookie,
-		&url,
-	]).output()?;
+	let out = Command::new("curl")
+		.args(&[
+			"-s",
+			"-o",
+			filename,
+			"-w",
+			"%{http_code}",
+			"--cookie",
+			&cookie,
+			&url,
+		])
+		.output()?;
 	let status: u16 = String::from_utf8_lossy(&out.stdout).trim().parse()?;
 	if !(status < 300 && status >= 200) {
 		eprintln!("Status {}; Message:\n{}", status, read_to_string(filename)?);
