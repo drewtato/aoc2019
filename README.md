@@ -1,6 +1,6 @@
 # Advent of Code 2019
 
-A repo of solutions to the 25 days of Advent of Code 2019 in Rust.
+A repo of solutions to the 25 days of [Advent of Code](https://adventofcode.com) 2019 in Rust.
 
 ## Personal Stats
 
