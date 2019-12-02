@@ -1,4 +1,5 @@
 use std::fs::read_to_string;
+// use std::io::Write;
 
 const ADD: usize = 1;
 const MULT: usize = 2;
@@ -30,21 +31,25 @@ fn main() {
 	input = input2.clone();
 
 	let (mut noun, mut verb) = (0, 0);
+	// let mut pic = std::fs::File::create("notes/day02grid.txt").unwrap();
 	loop {
 		input[1] = noun;
 		input[2] = verb;
 
 		run(&mut input);
-
+		// pic.write_all(&format!("{:8} ", input[0]).into_bytes()).unwrap();
+		
 		if input[0] == desired {
 			break;
 		}
-
+		
 		verb += 1;
 		if verb == 100 {
+			// pic.write_all(b"\n").unwrap();
 			noun += 1;
 			if noun == 100 {
 				panic!("No good noun-verb pairs");
+				// break;
 			}
 			verb = 0;
 		}
