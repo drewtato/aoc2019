@@ -38,11 +38,11 @@ fn main() {
 
 		run(&mut input);
 		// pic.write_all(&format!("{:8} ", input[0]).into_bytes()).unwrap();
-		
+
 		if input[0] == desired {
 			break;
 		}
-		
+
 		verb += 1;
 		if verb == 100 {
 			// pic.write_all(b"\n").unwrap();
