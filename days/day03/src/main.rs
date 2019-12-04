@@ -93,9 +93,9 @@ fn main() {
 		img[(pixmap(x - min_x), pixmap(y - min_y))] = image::Rgb([0,0,0]);
 	}
 	*/
-	
+
 	let ans = first
-	.keys()
+		.keys()
 		.filter(|k| second.contains_key(k))
 		.min_by_key(|(y, x)| y.abs() + x.abs())
 		.unwrap();
