@@ -1,4 +1,4 @@
-#![feature(is_sorted)]
+// #![feature(is_sorted)]
 
 use itertools::Itertools;
 
@@ -18,6 +18,8 @@ fn main() {
 	let viable = input[0]..input[1];
 
 	let ans1: Vec<_> = (0..=9)
+	// Documentation:
+	// https://docs.rs/itertools/0.8.2/itertools/trait.Itertools.html#method.combinations_with_replacement
 		.combinations_with_replacement(6)
 		.filter(|v| viable.contains(&from_digits(v)))
 		.filter(|v| check1(v))
