@@ -10,11 +10,11 @@ fn main() {
 
 	let ans1: Vec<_> = (input[0]..=input[1])
 		.map(to_digits)
-		.filter(|n| check1(n))
+		.filter(|v| check1(v))
 		.collect();
 	println!("{}", ans1.len());
 
-	let ans2: Vec<_> = ans1.iter().filter(|n| check2(n)).collect();
+	let ans2: Vec<_> = ans1.into_iter().filter(|v| check2(v)).collect();
 	println!("{}", ans2.len());
 
 	// println!(
@@ -58,30 +58,20 @@ fn check1(digits: &[u8]) -> bool {
 	false
 }
 
-use std::iter::once;
-
 fn check2(digits: &[u8]) -> bool {
 	// Check for lone double
-	for (a, &b, &c, d) in once(None)
-		.chain(digits.iter().map(Some))
-		.chain(once(None))
-		.collect::<Vec<_>>()
-		.windows(4)
-		.map(|win| (win[0], win[1].unwrap(), win[2].unwrap(), win[3]))
-	{
-		if let Some(&a) = a {
-			if b == a {
-				continue;
+	let mut current_count = 0;
+	let mut current_num = 0;
+	for &d in digits {
+		if d == current_num {
+			current_count += 1;
+		} else {
+			if current_count == 2 {
+				return true;
 			}
-		}
-		if let Some(&d) = d {
-			if b == d {
-				continue;
-			}
-		}
-		if b == c {
-			return true;
+			current_num = d;
+			current_count = 1;
 		}
 	}
-	false
+	current_count == 2
 }
