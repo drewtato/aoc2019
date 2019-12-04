@@ -50,8 +50,8 @@ fn check1(digits: &[u8]) -> bool {
 	}
 
 	// Check for repeats
-	for (a, b) in digits.windows(2).map(|win| (win[0], win[1])) {
-		if a == b {
+	for win in digits.windows(2) {
+		if win[0] == win[1] {
 			return true;
 		}
 	}
