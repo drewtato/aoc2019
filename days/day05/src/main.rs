@@ -52,12 +52,18 @@ fn run(mut code: Vec<isize>, input: isize) -> Vec<isize> {
 			3 => {
 				let w = code[pc + 1] as usize;
 				code[w] = input;
-				println!("Inputted {}", input);
+				// println!("Inputted {}", input);
 				2 + pc
 			}
 			4 => {
-				let res = code[code[pc + 1] as usize];
-				println!("{}", res);
+				// let res = code[code[pc + 1] as usize];
+				let mut res = code[pc + 1];
+				if modes[1] == 0 {
+					res = code[res as usize];
+				}
+				if res != 0 {
+					println!("{}", res);
+				}
 				2 + pc
 			}
 			5 => {
