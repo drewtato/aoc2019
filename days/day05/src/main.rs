@@ -1,7 +1,7 @@
 fn main() {
 	let input: Vec<isize> = std::fs::read_to_string("inputs/day05.txt")
 		.unwrap()
-	// let input: Vec<isize> = "3,9,8,9,10,9,4,9,99,-1,8"
+		// let input: Vec<isize> = "3,9,8,9,10,9,4,9,99,-1,8"
 		.trim()
 		.split(',')
 		.map(|n| n.trim().parse().unwrap())
@@ -67,7 +67,7 @@ fn run(mut code: Vec<isize>, input: isize) -> Vec<isize> {
 				2 + pc
 			}
 			5 => {
-				let (mut a, mut b) = (code[pc + 1],code[pc + 2]);
+				let (mut a, mut b) = (code[pc + 1], code[pc + 2]);
 				if modes[1] == 0 {
 					a = code[a as usize];
 				}
@@ -81,7 +81,7 @@ fn run(mut code: Vec<isize>, input: isize) -> Vec<isize> {
 				}
 			}
 			6 => {
-				let (mut a, mut b) = (code[pc + 1],code[pc + 2]);
+				let (mut a, mut b) = (code[pc + 1], code[pc + 2]);
 				if modes[1] == 0 {
 					a = code[a as usize];
 				}
@@ -95,7 +95,7 @@ fn run(mut code: Vec<isize>, input: isize) -> Vec<isize> {
 				}
 			}
 			7 => {
-				let (mut a, mut b, c) = (code[pc + 1],code[pc + 2], code[pc + 3]);
+				let (mut a, mut b, c) = (code[pc + 1], code[pc + 2], code[pc + 3]);
 				if modes[1] == 0 {
 					a = code[a as usize];
 				}
@@ -106,7 +106,7 @@ fn run(mut code: Vec<isize>, input: isize) -> Vec<isize> {
 				4 + pc
 			}
 			8 => {
-				let (mut a, mut b, c) = (code[pc + 1],code[pc + 2], code[pc + 3]);
+				let (mut a, mut b, c) = (code[pc + 1], code[pc + 2], code[pc + 3]);
 				if modes[1] == 0 {
 					a = code[a as usize];
 				}
