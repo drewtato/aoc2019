@@ -35,8 +35,8 @@ fn main() -> ResultBox<()> {
 		while let Ok(status) = get_input(day, &input_file) {
 			if status < 300 && status >= 200 {
 				let cmd = format!("cargo run -p day{:02}", day);
-				
-				use clipboard::{ClipboardProvider, ClipboardContext};
+
+				use clipboard::{ClipboardContext, ClipboardProvider};
 				let mut ctx: ClipboardContext = ClipboardProvider::new().unwrap();
 				if ctx.set_contents(cmd.to_owned()).is_ok() {
 					println!("Set clipboard!");
