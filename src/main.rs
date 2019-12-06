@@ -34,10 +34,14 @@ fn main() -> ResultBox<()> {
 
 		while let Ok(status) = get_input(day, &input_file) {
 			if status < 300 && status >= 200 {
-				println!(
-					"Command to run:\n\ncargo run -- {}\n\nGood luck 🎄",
-					code_dir
-				);
+				let cmd = format!("cargo run -p day{:02}", day);
+				
+				use clipboard::{ClipboardProvider, ClipboardContext};
+				let mut ctx: ClipboardContext = ClipboardProvider::new().unwrap();
+				if ctx.set_contents(cmd.to_owned()).is_ok() {
+					println!("Set clipboard!");
+				}
+				println!("Command to run:\n\n{}\n\nGood luck 🎄", cmd);
 				break;
 			}
 
