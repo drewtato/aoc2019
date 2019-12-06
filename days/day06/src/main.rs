@@ -3,8 +3,10 @@ use std::collections::HashMap;
 fn main() {
 	let input: HashMap<String, String> = std::fs::read_to_string("inputs/day06.txt")
 		.unwrap()
-	// let input: HashMap<String, String> = "COM)B\nB)C\nC)D\nD)E\nE)F\nB)G\nG)H\nD)I\nE)J\nJ)K\nK)L"
-	// let input: HashMap<String, String> = "COM)B\nB)C\nC)D\nD)E\nE)F\nB)G\nG)H\nD)I\nE)J\nJ)K\nK)L\nK)YOU\nI)SAN"
+	// let input: HashMap<String, String> = 
+	// 	"COM)B\nB)C\nC)D\nD)E\nE)F\nB)G\nG)H\nD)I\nE)J\nJ)K\nK)L"
+	// let input: HashMap<String, String> = 
+	// 	"COM)B\nB)C\nC)D\nD)E\nE)F\nB)G\nG)H\nD)I\nE)J\nJ)K\nK)L\nK)YOU\nI)SAN"
 		.trim()
 		.lines()
 		.map(|l| {
@@ -30,7 +32,7 @@ fn main() {
 	working.push(center);
 
 	while !working.is_empty() {
-		println!("{:?}", working);
+		// println!("{:?}", working);
 		let new_working: Vec<&str> = working
 			.into_iter()
 			.filter_map(|v| orbits.get(v).map(|vs| vs.iter().copied()))
@@ -45,11 +47,12 @@ fn main() {
 	
 	let mut you_things = HashMap::new();
 	let mut here = "YOU";
-	let mut counter = 0;
+	you_things.insert(here, 0);
+	let mut counter = 1;
 	while here != center {
+		here = &input[here];
 		you_things.insert(here, counter);
 		counter += 1;
-		here = &input[here];
 	}
 	let mut here = "SAN";
 	let mut counter = 0;
