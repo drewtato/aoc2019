@@ -16,7 +16,7 @@ mod tests {
 	}
 
 	mod programs {
-		use crate::{parse_program, parse_file, run};
+		use crate::{parse_file, parse_program, run};
 
 		#[test]
 		fn add_mul() {
@@ -28,7 +28,7 @@ mod tests {
 			let res = run(&mut program, &mut None.into_iter());
 			assert!(res.unwrap().is_empty());
 			assert_eq!(program[0], 3_790_645);
-			
+
 			program2[1] = 65;
 			program2[2] = 77;
 			let res = run(&mut program2, &mut None.into_iter());
@@ -49,7 +49,7 @@ mod tests {
 			let res = run(&mut program, &mut vec![5].into_iter());
 			assert_eq!(&res.unwrap(), &[513_116]);
 		}
-		
+
 		#[test]
 		fn not_enough_input() {
 			let mut program = parse_program("3,0").unwrap();
@@ -132,7 +132,7 @@ pub fn run(
 			Ok(Some(new_pc)) => pc = new_pc,
 			Ok(None) => break,
 			Err(e) => {
-				eprintln!("Error `{}` on {} at {}", e, code[pc], pc);
+				eprintln!("Error `{}` on {} at {}", e, NAMES[code[pc] as usize], pc);
 				return Err(output);
 			}
 		}
