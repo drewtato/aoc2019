@@ -3,10 +3,10 @@ use std::collections::HashMap;
 fn main() {
 	let input: HashMap<String, String> = std::fs::read_to_string("inputs/day06.txt")
 		.unwrap()
-	// let input: HashMap<String, String> = 
-	// 	"COM)B\nB)C\nC)D\nD)E\nE)F\nB)G\nG)H\nD)I\nE)J\nJ)K\nK)L"
-	// let input: HashMap<String, String> = 
-	// 	"COM)B\nB)C\nC)D\nD)E\nE)F\nB)G\nG)H\nD)I\nE)J\nJ)K\nK)L\nK)YOU\nI)SAN"
+		// let input: HashMap<String, String> =
+		// 	"COM)B\nB)C\nC)D\nD)E\nE)F\nB)G\nG)H\nD)I\nE)J\nJ)K\nK)L"
+		// let input: HashMap<String, String> =
+		// 	"COM)B\nB)C\nC)D\nD)E\nE)F\nB)G\nG)H\nD)I\nE)J\nJ)K\nK)L\nK)YOU\nI)SAN"
 		.trim()
 		.lines()
 		.map(|l| {
@@ -44,7 +44,7 @@ fn main() {
 	}
 
 	println!("{}", total);
-	
+
 	let mut you_things = HashMap::new();
 	let mut here = "YOU";
 	you_things.insert(here, 0);
@@ -60,6 +60,6 @@ fn main() {
 		counter += 1;
 		here = &input[here];
 	}
-	
+
 	println!("{}", counter + you_things[here] - 2);
 }
