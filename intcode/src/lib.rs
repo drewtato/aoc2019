@@ -128,7 +128,8 @@ pub fn run(
 	let mut pc = 0;
 	let mut output = Vec::new();
 	loop {
-		match run_once(code, input, &mut output, pc) {
+		let (result, _) = run_once(code, input, &mut output, pc);
+		match result {
 			Ok(Some(new_pc)) => pc = new_pc,
 			Ok(None) => break,
 			Err(e) => {
@@ -145,8 +146,10 @@ pub fn run_once(
 	input: &mut impl Iterator<Item = isize>,
 	output: &mut Vec<isize>,
 	pc: usize,
-) -> Result<Option<usize>, &'static str> {
+	// Ok(Some((new pc, consumed input))), Ok(None) = Halted
+) -> (Result<Option<usize>, &'static str>, bool) {
 	let (op, modes) = opcode_modes(code[pc]);
+	let mut consumed_input = false;
 
 	// A vec of positions in `code`.
 	let posns: Vec<_> = modes
@@ -164,7 +167,7 @@ pub fn run_once(
 
 	// eprintln!("{} {:?} {} {:?} {:?}", pc, &code[pc..pc + 4], op, modes, posns);
 
-	Ok(Some(match op {
+	let new_pc = Ok(Some(match op {
 		ADD => {
 			code[posns[2]] = code[posns[0]] + code[posns[1]];
 			4 + pc
@@ -174,7 +177,11 @@ pub fn run_once(
 			4 + pc
 		}
 		INPUT => {
-			code[posns[0]] = input.next().ok_or("Not enough inputs")?;
+			code[posns[0]] = match input.next() {
+				Some(x) => x,
+				None => return (Err("Not enough inputs"), consumed_input),
+			};
+			consumed_input = true;
 			2 + pc
 		}
 		OUTPUT => {
@@ -211,7 +218,58 @@ pub fn run_once(
 			};
 			4 + pc
 		}
-		HALT => return Ok(None),
-		_ => return Err("Invalid instruction"),
-	}))
+		HALT => return (Ok(None), consumed_input),
+		_ => return (Err("Invalid instruction"), consumed_input),
+	}));
+	(new_pc, consumed_input)
+}
+
+use std::collections::VecDeque;
+
+pub struct IntcodeIterator {
+	pub program: Vec<isize>,
+	pub pc: usize,
+	pub input: VecDeque<isize>,
+}
+
+impl IntcodeIterator {
+	pub fn new(program: Vec<isize>) -> Self {
+		IntcodeIterator {
+			program,
+			pc: 0,
+			input: VecDeque::new(),
+		}
+	}
+	pub fn add_input(&mut self, input: isize) {
+		self.input.push_back(input);
+	}
+	pub fn add_input_iter(&mut self, input: impl IntoIterator<Item = isize>) {
+		self.input.extend(input);
+	}
+}
+
+impl Iterator for IntcodeIterator {
+	type Item = isize;
+
+	fn next(&mut self) -> Option<Self::Item> {
+		let mut output = Vec::new();
+		while output.is_empty() {
+			let (result, consumed) = run_once(
+				&mut self.program,
+				&mut self.input.get(0).cloned().into_iter(),
+				&mut output,
+				self.pc,
+			);
+			if consumed {
+				self.input.pop_front();
+			}
+			match result.unwrap() {
+				None => return None,
+				Some(pc) => {
+					self.pc = pc;
+				}
+			}
+		}
+		output.pop()
+	}
 }
