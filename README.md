@@ -7,6 +7,7 @@ A repo of solutions to the 25 days of [Advent of Code](https://adventofcode.com)
 ```text
       -------Part 1--------   -------Part 2--------
 Day       Time  Rank  Score       Time  Rank  Score
+  7   00:19:06   533      0   01:33:33   995      0
   6   00:44:45  2286      0   00:51:05  1610      0
   5   00:42:33  1142      0   00:56:25   957      0
   4   00:13:35  1881      0   00:29:36  1894      0
