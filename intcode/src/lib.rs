@@ -255,6 +255,9 @@ impl IntcodeIterator {
 		self.add_input_iter(input);
 		self
 	}
+	pub fn is_halted(&self) -> bool {
+		self.pc.is_none()
+	}
 }
 
 impl Iterator for IntcodeIterator {
@@ -263,6 +266,7 @@ impl Iterator for IntcodeIterator {
 	fn next(&mut self) -> Option<Self::Item> {
 		let mut output = Vec::new();
 		while output.is_empty() {
+			// Returns None when halted
 			self.pc?;
 			let (result, consumed) = run_once(
 				&mut self.program,
