@@ -10,7 +10,7 @@ const YEAR: u32 = 2019;
 const TEMPLATE: &[u8] = br#"
 use std::fs::read_to_string;
 
-fn _main() {
+fn main() {
 	let input: Vec<Vec<isize>> = read_to_string(format!("inputs/day{:02}.txt", DAY))
 		.unwrap()
 		.trim()
@@ -37,7 +37,7 @@ fn main() -> ResultBox<()> {
 
 		let mut source = fs::File::create(format!("{}/src/main.rs", code_dir)).unwrap();
 		source
-			.write_all(format!("const DAY = {};", day).as_bytes())
+			.write_all(format!("const DAY: u8 = {};", day).as_bytes())
 			.unwrap();
 		source.write_all(TEMPLATE).unwrap();
 	} else {
