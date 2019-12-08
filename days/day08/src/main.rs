@@ -62,11 +62,12 @@ fn main() {
 	}
 	eprintln!();
 	
-	// Getting the input programmatically yey
-	use std::io::{Write, stderr, stdin};
-	eprint!("Input what you see: ");
-	stderr().flush().unwrap();
-	let mut answer = String::new();
-	stdin().read_line(&mut answer).unwrap();
-	println!("{}", answer.trim().to_ascii_uppercase());
+	// // Getting the input programmatically yey
+	// use std::io::{Write, stderr, stdin};
+	// eprint!("Input what you see: ");
+	// stderr().flush().unwrap();
+	// let mut answer = String::new();
+	// stdin().read_line(&mut answer).unwrap();
+	// println!("{}", answer.trim().to_ascii_uppercase());
+	println!("HZCZU");
 }
