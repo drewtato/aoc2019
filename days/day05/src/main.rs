@@ -5,9 +5,12 @@ fn main() {
 
 	// println!("{:?}", program);
 
-	let end = IntcodeIterator::new(program.clone()).with_input(1).last().unwrap();
+	let end = IntcodeIterator::new(program.clone())
+		.with_input(1)
+		.last()
+		.unwrap();
 	println!("{}", end);
-	
+
 	let end = IntcodeIterator::new(program).with_input(5).last().unwrap();
 	println!("{}", end);
 }

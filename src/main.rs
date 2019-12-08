@@ -7,16 +7,39 @@ use std::{
 
 const YEAR: u32 = 2019;
 
+const TEMPLATE: &[u8] = br#"
+use std::fs::read_to_string;
+
+fn _main() {
+	let input: Vec<Vec<isize>> = read_to_string(format!("inputs/day{:02}.txt", DAY))
+		.unwrap()
+		.trim()
+		.lines()
+		.map(|l| l.split(',').map(|n| n.trim().parse().unwrap()).collect())
+		.collect();
+	
+	println!("{:?}", input);
+}
+"#;
+
 type ResultBox<T> = Result<T, Box<dyn std::error::Error>>;
 
 fn main() -> ResultBox<()> {
 	let args: Vec<String> = args().collect();
 	let day: u8 = args[1].parse()?;
-	let input_file = format!("inputs/day{:02}.txt", day);
-	let code_dir = format!("days/day{:02}", day);
+	let day_fmt = format!("day{:02}", day);
+	let input_file = format!("inputs/{}.txt", day_fmt);
+	let code_dir = format!("days/{}", day_fmt);
 
 	if fs::read_dir(&code_dir).is_err() {
+		println!("Creating code directory `{}`", code_dir);
 		Command::new("cargo").args(&["new", &code_dir]).status()?;
+
+		let mut source = fs::File::create(format!("{}/src/main.rs", code_dir)).unwrap();
+		source
+			.write_all(format!("const DAY = {};", day).as_bytes())
+			.unwrap();
+		source.write_all(TEMPLATE).unwrap();
 	} else {
 		println!("Code directory `{}` already exists", code_dir);
 	}
