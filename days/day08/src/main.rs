@@ -8,6 +8,6 @@ fn main() {
 		.lines()
 		.map(|l| l.split(',').map(|n| n.trim().parse().unwrap()).collect())
 		.collect();
-	
+
 	println!("{:?}", input);
 }
