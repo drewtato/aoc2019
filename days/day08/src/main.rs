@@ -17,6 +17,7 @@ fn main() {
 
 	let layers = input.chunks(WIDTH * HEIGHT).collect::<Vec<_>>();
 
+	#[allow(clippy::naive_bytecount)]
 	let fewest_zero = layers
 		.iter()
 		.enumerate()
@@ -34,25 +35,38 @@ fn main() {
 	println!("{}", one * two);
 
 	let mut image = [2; WIDTH * HEIGHT];
-	for layer in layers.iter() {
-		for (im, &pix) in image.iter_mut().zip(layer.iter()) {
-			if *im == 2 {
-				*im = pix;
+	for (i, im) in image.iter_mut().enumerate() {
+		for layer in layers.iter() {
+			if layer[i] != 2 {
+				*im = layer[i];
+				break;
 			}
 		}
 	}
+	
+	eprintln!();
 	for row in image.chunks(WIDTH) {
+		eprint!("  ");
 		for pix in row {
-			print!(
+			eprint!(
 				"{}",
 				match pix {
 					0 => "  ",
-					1 => "##",
+					1 => "██",
 					2 => "__",
-					_ => panic!(),
+					_ => unreachable!(),
 				}
 			);
 		}
-		println!();
+		eprintln!();
 	}
+	eprintln!();
+	
+	// Getting the input programmatically yey
+	use std::io::{Write, stderr, stdin};
+	eprint!("Input what you see: ");
+	stderr().flush().unwrap();
+	let mut answer = String::new();
+	stdin().read_line(&mut answer).unwrap();
+	println!("{}", answer.trim().to_ascii_uppercase());
 }
