@@ -226,9 +226,10 @@ pub fn run_once(
 
 use std::collections::VecDeque;
 
+#[derive(Debug, Clone)]
 pub struct IntcodeIterator {
 	pub program: Vec<isize>,
-	pub pc: usize,
+	pub pc: Option<usize>,
 	pub input: VecDeque<isize>,
 }
 
@@ -236,15 +237,23 @@ impl IntcodeIterator {
 	pub fn new(program: Vec<isize>) -> Self {
 		IntcodeIterator {
 			program,
-			pc: 0,
+			pc: Some(0),
 			input: VecDeque::new(),
 		}
 	}
 	pub fn add_input(&mut self, input: isize) {
 		self.input.push_back(input);
 	}
+	pub fn with_input(mut self, input: isize) -> Self {
+		self.add_input(input);
+		self
+	}
 	pub fn add_input_iter(&mut self, input: impl IntoIterator<Item = isize>) {
 		self.input.extend(input);
+	}
+	pub fn with_input_iter(mut self, input: impl IntoIterator<Item = isize>) -> Self {
+		self.add_input_iter(input);
+		self
 	}
 }
 
@@ -254,21 +263,17 @@ impl Iterator for IntcodeIterator {
 	fn next(&mut self) -> Option<Self::Item> {
 		let mut output = Vec::new();
 		while output.is_empty() {
+			self.pc?;
 			let (result, consumed) = run_once(
 				&mut self.program,
 				&mut self.input.get(0).cloned().into_iter(),
 				&mut output,
-				self.pc,
+				self.pc.unwrap(),
 			);
 			if consumed {
 				self.input.pop_front();
 			}
-			match result.unwrap() {
-				None => return None,
-				Some(pc) => {
-					self.pc = pc;
-				}
-			}
+			self.pc = result.unwrap();
 		}
 		output.pop()
 	}
