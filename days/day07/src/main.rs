@@ -54,5 +54,6 @@ fn main() {
 		})
 		.max()
 		.unwrap();
+
 	println!("{}", best);
 }
