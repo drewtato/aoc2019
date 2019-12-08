@@ -38,19 +38,17 @@ fn main() {
 				.map(|&p| IntcodeIterator::new(program.clone()).with_input(p))
 				.collect();
 
-			amps[0].add_input(0);
-			let mut output = None;
-			for current in (0..5).cycle() {
-				let next_amp = (current + 1) % 5;
-				match amps[current].next() {
-					None => {
-						output = amps[current].input.pop_back();
-						break;
-					}
-					Some(s) => amps[next_amp].add_input(s),
-				}
-			}
-			output.unwrap()
+			(0..5)
+				.cycle()
+				.map(|n| (&mut amps[n]) as *mut IntcodeIterator)
+				// Unsafe: We need to check if the machine has halted and run the machine.
+				// We aren't deleting the amps until later, and these operations don't happen at
+				// the same time, so it is safe.
+				.take_while(|&cur| unsafe { !(*cur).is_halted() })
+				.fold(0, |acc, cur| unsafe {
+					(*cur).add_input(acc);
+					(*cur).next().unwrap_or(acc)
+				})
 		})
 		.max()
 		.unwrap();
