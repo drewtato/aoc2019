@@ -61,15 +61,16 @@ mod tests {
 
 use consts::*;
 pub mod consts {
-	pub const ADD: isize = 1;
-	pub const MULT: isize = 2;
-	pub const INPUT: isize = 3;
-	pub const OUTPUT: isize = 4;
-	pub const JUMP_NOT_ZERO: isize = 5;
-	pub const JUMP_IS_ZERO: isize = 6;
-	pub const LESS_THAN: isize = 7;
-	pub const EQUAL_TO: isize = 8;
-	pub const HALT: isize = 99;
+	pub const ADD: i64 = 1;
+	pub const MULT: i64 = 2;
+	pub const INPUT: i64 = 3;
+	pub const OUTPUT: i64 = 4;
+	pub const JUMP_NOT_ZERO: i64 = 5;
+	pub const JUMP_IS_ZERO: i64 = 6;
+	pub const LESS_THAN: i64 = 7;
+	pub const EQUAL_TO: i64 = 8;
+	pub const ADJUST_REL_BASE: i64 = 9;
+	pub const HALT: i64 = 99;
 
 	#[rustfmt::skip]
 	pub const NAMES: [&str; 100] = [
@@ -81,7 +82,7 @@ pub mod consts {
 		"JUMP_NOT_ZERO",
 		"JUMP_IS_ZERO",
 		"LESS_THAN",
-		"EQUAL_TO","",
+		"EQUAL_TO","ADJUST_REL_BASE",
 		"","","","","","","","","","", // 10-19
 		"","","","","","","","","","", // 20-29
 		"","","","","","","","","","", // 30-39
@@ -96,19 +97,20 @@ pub mod consts {
 
 use std::error::Error;
 
-pub fn parse_file(filename: &str) -> Result<Vec<isize>, Box<dyn Error>> {
+pub fn parse_file(filename: &str) -> Result<Vec<i64>, Box<dyn Error>> {
 	Ok(parse_program(&std::fs::read_to_string(filename)?)?)
 }
 
-pub fn parse_program(prog_str: &str) -> Result<Vec<isize>, std::num::ParseIntError> {
+pub fn parse_program(prog_str: &str) -> Result<Vec<i64>, std::num::ParseIntError> {
 	prog_str
 		.trim()
 		.split(',')
 		.map(|n| n.trim().parse())
+		.chain(std::iter::once(Ok(0)).cycle().take(10_000))
 		.collect()
 }
 
-fn opcode_modes(mut instruction: isize) -> (isize, Vec<isize>) {
+fn opcode_modes(mut instruction: i64) -> (i64, Vec<i64>) {
 	let mut modes = Vec::with_capacity(3);
 	let op = instruction % 100;
 	instruction /= 100;
@@ -122,9 +124,9 @@ fn opcode_modes(mut instruction: isize) -> (isize, Vec<isize>) {
 /// Runs an intcode program consisting of an array of integers. Takes input as an array of integers
 /// and returns output as an array of integers.
 pub fn run(
-	code: &mut [isize],
-	input: &mut impl Iterator<Item = isize>,
-) -> Result<Vec<isize>, Vec<isize>> {
+	code: &mut Vec<i64>,
+	input: &mut impl Iterator<Item = i64>,
+) -> Result<Vec<i64>, Vec<i64>> {
 	let mut pc = 0;
 	let mut output = Vec::new();
 	loop {
@@ -142,9 +144,9 @@ pub fn run(
 }
 
 pub fn run_once(
-	code: &mut [isize],
-	input: &mut impl Iterator<Item = isize>,
-	output: &mut Vec<isize>,
+	code: &mut Vec<i64>,
+	input: &mut impl Iterator<Item = i64>,
+	output: &mut Vec<i64>,
 	pc: usize,
 	// Ok(Some((new pc, consumed input))), Ok(None) = Halted
 ) -> (Result<Option<usize>, &'static str>, bool) {
@@ -157,11 +159,21 @@ pub fn run_once(
 		.enumerate()
 		.filter_map(|(i, &mode)| {
 			let pos = pc + i + 1;
-			if mode == 0 {
-				code.get(pos).map(|&x| x as usize)
-			} else {
-				Some(pos)
-			}
+			let index = match mode {
+				0 => code.get(pos).map(|&x| x as usize),
+				1 => Some(pos),
+				2 => code.get(pos).map(|&x| (x + code[code.len() - 1]) as usize),
+				_ => panic!("Bad mode"),
+			};
+			if let Some(index) = index {
+			let spots_to_add = (index as i64) - (code.len() as i64) + 2;
+			if spots_to_add > 0 {
+				let relative_base = code[code.len() - 1];
+				code.resize_with(code.len() + spots_to_add as usize, Default::default);
+				let end = code.len() - 1;
+				code[end] = relative_base;
+			}}
+			index
 		})
 		.collect();
 
@@ -218,6 +230,11 @@ pub fn run_once(
 			};
 			4 + pc
 		}
+		ADJUST_REL_BASE => {
+			let rel_base_index = code.len() - 1;
+			code[rel_base_index] += code[posns[0]];
+			2 + pc
+		}
 		HALT => return (Ok(None), consumed_input),
 		_ => return (Err("Invalid instruction"), consumed_input),
 	}));
@@ -228,30 +245,30 @@ use std::collections::VecDeque;
 
 #[derive(Debug, Clone)]
 pub struct IntcodeIterator {
-	pub program: Vec<isize>,
+	pub program: Vec<i64>,
 	pub pc: Option<usize>,
-	pub input: VecDeque<isize>,
+	pub input: VecDeque<i64>,
 }
 
 impl IntcodeIterator {
-	pub fn new(program: Vec<isize>) -> Self {
+	pub fn new(program: Vec<i64>) -> Self {
 		IntcodeIterator {
 			program,
 			pc: Some(0),
 			input: VecDeque::new(),
 		}
 	}
-	pub fn add_input(&mut self, input: isize) {
+	pub fn add_input(&mut self, input: i64) {
 		self.input.push_back(input);
 	}
-	pub fn with_input(mut self, input: isize) -> Self {
+	pub fn with_input(mut self, input: i64) -> Self {
 		self.add_input(input);
 		self
 	}
-	pub fn add_input_iter(&mut self, input: impl IntoIterator<Item = isize>) {
+	pub fn add_input_iter(&mut self, input: impl IntoIterator<Item = i64>) {
 		self.input.extend(input);
 	}
-	pub fn with_input_iter(mut self, input: impl IntoIterator<Item = isize>) -> Self {
+	pub fn with_input_iter(mut self, input: impl IntoIterator<Item = i64>) -> Self {
 		self.add_input_iter(input);
 		self
 	}
@@ -261,7 +278,7 @@ impl IntcodeIterator {
 }
 
 impl Iterator for IntcodeIterator {
-	type Item = isize;
+	type Item = i64;
 
 	fn next(&mut self) -> Option<Self::Item> {
 		let mut output = Vec::new();

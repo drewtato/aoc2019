@@ -7,7 +7,7 @@ const HEIGHT: usize = 6;
 fn main() {
 	let input: Vec<u8> = read_to_string(format!("inputs/day{:02}.txt", DAY))
 		.unwrap()
-	// let input: Vec<u8> = "0222112222120000"
+		// let input: Vec<u8> = "0222112222120000"
 		.trim()
 		.chars()
 		.map(|n| n.to_digit(10).unwrap() as u8)
@@ -43,7 +43,7 @@ fn main() {
 			}
 		}
 	}
-	
+
 	eprintln!();
 	for row in image.chunks(WIDTH) {
 		eprint!("  ");
@@ -61,7 +61,7 @@ fn main() {
 		eprintln!();
 	}
 	eprintln!();
-	
+
 	// // Getting the input programmatically yey
 	// use std::io::{Write, stderr, stdin};
 	// eprint!("Input what you see: ");
