@@ -30,6 +30,7 @@ fn main() -> ResultBox<()> {
 	let day_fmt = format!("day{:02}", day);
 	let input_file = format!("inputs/{}.txt", day_fmt);
 	let code_dir = format!("days/{}", day_fmt);
+	let notes_file = format!("notes/{}.md", day_fmt);
 
 	if fs::read_dir(&code_dir).is_err() {
 		println!("Creating code directory `{}`", code_dir);
@@ -45,6 +46,9 @@ fn main() -> ResultBox<()> {
 	}
 	if fs::File::open(&input_file).is_err() {
 		fs::File::create(&input_file)?;
+	}
+	if fs::File::open(&notes_file).is_err() {
+		fs::File::create(&notes_file)?;
 	}
 
 	if fs::read_to_string(&input_file)

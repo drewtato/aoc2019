@@ -169,7 +169,7 @@ pub fn run_once(
 			let spots_to_add = (index as i64) - (code.len() as i64) + 2;
 			if spots_to_add > 0 {
 				let relative_base = code[code.len() - 1];
-				code.resize_with(code.len() + spots_to_add as usize, Default::default);
+				code.resize(code.len() + spots_to_add as usize, 0);
 				let end = code.len() - 1;
 				code[end] = relative_base;
 			}}
