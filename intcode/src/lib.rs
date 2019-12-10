@@ -159,14 +159,14 @@ pub fn run_once(
 		.enumerate()
 		.filter_map(|(i, &mode)| {
 			let pos = pc + i + 1;
-			
+
 			let index = match mode {
 				0 => code.get(pos).map(|&x| x as usize),
 				1 => Some(pos),
 				2 => code.get(pos).map(|&x| (x + code[code.len() - 1]) as usize),
 				_ => panic!("Bad mode"),
 			};
-			
+
 			if let Some(index) = index {
 				let spots_to_add = (index as i64) - (code.len() as i64) + 2;
 				if spots_to_add > 0 {
