@@ -95,18 +95,22 @@ pub mod consts {
 	];
 }
 
+use std::collections::HashMap;
 use std::error::Error;
+type Memory = HashMap<usize, i64>;
 
-pub fn parse_file(filename: &str) -> Result<Vec<i64>, Box<dyn Error>> {
-	Ok(parse_program(&std::fs::read_to_string(filename)?)?)
+pub fn parse_file(filename: &str) -> Result<Memory, Box<dyn Error>> {
+	Ok(parse_program(&std::fs::read_to_string(filename)?))
 }
 
-pub fn parse_program(prog_str: &str) -> Result<Vec<i64>, std::num::ParseIntError> {
+pub fn parse_program(prog_str: &str) -> Memory {
 	prog_str
 		.trim()
 		.split(',')
-		.map(|n| n.trim().parse())
-		.chain(std::iter::once(Ok(0)).cycle().take(10_000))
+		.map(|n| n.trim().parse().unwrap())
+		.enumerate()
+		.chain(std::iter::once((usize::max_value(), 0)))
+		// .map(|(i, e)| e.map(|val| (e, val)))
 		.collect()
 }
 
@@ -123,10 +127,7 @@ fn opcode_modes(mut instruction: i64) -> (i64, Vec<i64>) {
 
 /// Runs an intcode program consisting of an array of integers. Takes input as an array of integers
 /// and returns output as an array of integers.
-pub fn run(
-	code: &mut Vec<i64>,
-	input: &mut impl Iterator<Item = i64>,
-) -> Result<Vec<i64>, Vec<i64>> {
+pub fn run(code: &mut Memory, input: &mut impl Iterator<Item = i64>) -> Result<Vec<i64>, Vec<i64>> {
 	let mut pc = 0;
 	let mut output = Vec::new();
 	loop {
@@ -135,7 +136,7 @@ pub fn run(
 			Ok(Some(new_pc)) => pc = new_pc,
 			Ok(None) => break,
 			Err(e) => {
-				eprintln!("Error `{}` on {} at {}", e, NAMES[code[pc] as usize], pc);
+				eprintln!("Error `{}` on {} at {}", e, NAMES[code[&pc] as usize], pc);
 				return Err(output);
 			}
 		}
@@ -144,38 +145,29 @@ pub fn run(
 }
 
 pub fn run_once(
-	code: &mut Vec<i64>,
+	code: &mut Memory,
 	input: &mut impl Iterator<Item = i64>,
 	output: &mut Vec<i64>,
 	pc: usize,
 	// Ok(Some((new pc, consumed input))), Ok(None) = Halted
 ) -> (Result<Option<usize>, &'static str>, bool) {
-	let (op, modes) = opcode_modes(code[pc]);
+	let (op, modes) = opcode_modes(code[&pc]);
 	let mut consumed_input = false;
 
 	// A vec of positions in `code`.
 	let posns: Vec<_> = modes
 		.iter()
 		.enumerate()
-		.filter_map(|(i, &mode)| {
+		.map(|(i, &mode)| {
 			let pos = pc + i + 1;
 
 			let index = match mode {
-				0 => code.get(pos).map(|&x| x as usize),
-				1 => Some(pos),
-				2 => code.get(pos).map(|&x| (x + code[code.len() - 1]) as usize),
+				0 => *code.entry(pos).or_insert(0) as usize,
+				1 => pos,
+				2 => (*code.entry(pos).or_insert(0) + code[&usize::max_value()]) as usize,
 				_ => panic!("Bad mode"),
 			};
-
-			if let Some(index) = index {
-				let spots_to_add = (index as i64) - (code.len() as i64) + 2;
-				if spots_to_add > 0 {
-					let relative_base = code[code.len() - 1];
-					code.resize(code.len() + spots_to_add as usize, 0);
-					let end = code.len() - 1;
-					code[end] = relative_base;
-				}
-			}
+			code.entry(index).or_insert(0);
 			index
 		})
 		.collect();
@@ -184,58 +176,67 @@ pub fn run_once(
 
 	let new_pc = Ok(Some(match op {
 		ADD => {
-			code[posns[2]] = code[posns[0]] + code[posns[1]];
+			code.insert(posns[2], code[&posns[0]] + code[&posns[1]]);
 			4 + pc
 		}
 		MULT => {
-			code[posns[2]] = code[posns[0]] * code[posns[1]];
+			code.insert(posns[2], code[&posns[0]] * code[&posns[1]]);
 			4 + pc
 		}
 		INPUT => {
-			code[posns[0]] = match input.next() {
-				Some(x) => x,
-				None => return (Err("Not enough inputs"), consumed_input),
-			};
+			code.insert(
+				posns[0],
+				match input.next() {
+					Some(x) => x,
+					None => return (Err("Not enough inputs"), consumed_input),
+				},
+			);
 			consumed_input = true;
 			2 + pc
 		}
 		OUTPUT => {
-			output.push(code[posns[0]]);
+			output.push(code[&posns[0]]);
 			2 + pc
 		}
 		JUMP_NOT_ZERO => {
-			if code[posns[0]] != 0 {
-				code[posns[1]] as usize
+			if code[&posns[0]] != 0 {
+				code[&posns[1]] as usize
 			} else {
 				pc + 3
 			}
 		}
 		JUMP_IS_ZERO => {
-			if code[posns[0]] == 0 {
-				code[posns[1]] as usize
+			if code[&posns[0]] == 0 {
+				code[&posns[1]] as usize
 			} else {
 				pc + 3
 			}
 		}
 		LESS_THAN => {
-			code[posns[2]] = if code[posns[0]] < code[posns[1]] {
-				1
-			} else {
-				0
-			};
+			code.insert(
+				posns[2],
+				if code[&posns[0]] < code[&posns[1]] {
+					1
+				} else {
+					0
+				},
+			);
 			4 + pc
 		}
 		EQUAL_TO => {
-			code[posns[2]] = if code[posns[0]] == code[posns[1]] {
-				1
-			} else {
-				0
-			};
+			code.insert(
+				posns[2],
+				if code[&posns[0]] == code[&posns[1]] {
+					1
+				} else {
+					0
+				},
+			);
 			4 + pc
 		}
 		ADJUST_REL_BASE => {
-			let rel_base_index = code.len() - 1;
-			code[rel_base_index] += code[posns[0]];
+			let rel_base_index = usize::max_value();
+			*code.get_mut(&rel_base_index).unwrap() += code[&posns[0]];
 			2 + pc
 		}
 		HALT => return (Ok(None), consumed_input),
@@ -248,13 +249,13 @@ use std::collections::VecDeque;
 
 #[derive(Debug, Clone)]
 pub struct IntcodeIterator {
-	pub program: Vec<i64>,
+	pub program: Memory,
 	pub pc: Option<usize>,
 	pub input: VecDeque<i64>,
 }
 
 impl IntcodeIterator {
-	pub fn new(program: Vec<i64>) -> Self {
+	pub fn new(program: Memory) -> Self {
 		IntcodeIterator {
 			program,
 			pc: Some(0),

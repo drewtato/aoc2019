@@ -64,7 +64,7 @@ fn main() {
 	// let cols = asteroids.iter().map(|(_y, x)| x).max().unwrap() + 1;
 	// let mut img_num = 0;
 	// create_folder();
-	
+
 	for _ in 0..200 {
 		// save_image(&sorted_list, rows, cols, &mut img_num, best_y, best_x, None);
 		while sorted_list[current].4.is_empty() {
@@ -74,7 +74,6 @@ fn main() {
 		in_order = sorted_list[current].4.pop_front().unwrap();
 		current += 1;
 		current %= sorted_list.len();
-		
 	}
 	println!("{}{:02}", in_order.1, in_order.0);
 	// save_image(&sorted_list, rows, cols, &mut img_num, best_y, best_x, Some(in_order));
@@ -101,7 +100,7 @@ fn main() {
 // 	std::process::Command::new("ffmpeg.exe")
 // 		.args("-hide_banner -i pics/%04d.png -c:v h264_nvenc -b:v 2M notes/day10.mp4 -y".split_whitespace())
 // 		.status().unwrap();
-	
+
 // 	std::fs::remove_dir_all("pics").unwrap();
 // }
 

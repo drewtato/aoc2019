@@ -168,6 +168,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "day11"
+version = "0.1.0"
+dependencies = [
+ "image 0.22.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "intcode 0.1.0",
+]
+
+[[package]]
 name = "deflate"
 version = "0.7.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
