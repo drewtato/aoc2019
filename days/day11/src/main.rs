@@ -26,37 +26,24 @@ fn print_map(visited_panels: &HashMap<(isize, isize), i64>) {
 	// if *counter != 0 {
 	// 	return;
 	// }
-	let min_x = *visited_panels
-		.iter()
-		.map(|((_y, x), _p)|x)
-		.min()
-		.unwrap();
-	let max_x = *visited_panels
-		.iter()
-		.map(|((_y, x), _p)|x)
-		.max()
-		.unwrap();
-	let min_y = *visited_panels
-		.iter()
-		.map(|((y, _x), _p)|y)
-		.min()
-		.unwrap();
-	let max_y = *visited_panels
-		.iter()
-		.map(|((y, _x), _p)|y)
-		.max()
-		.unwrap();
-	
+	let min_x = *visited_panels.iter().map(|((_y, x), _p)| x).min().unwrap();
+	let max_x = *visited_panels.iter().map(|((_y, x), _p)| x).max().unwrap();
+	let min_y = *visited_panels.iter().map(|((y, _x), _p)| y).min().unwrap();
+	let max_y = *visited_panels.iter().map(|((y, _x), _p)| y).max().unwrap();
+
 	// let (min_x, max_x) = (-52, 42);
 	// let (min_y, max_y) = (-18, 48);
-	
+
 	// println!("{:?} {:?}", (min_x, max_x), (min_y, max_y));
 	for row in min_y..=max_y {
 		for col in min_x..=max_x {
-			eprint!("{}", match visited_panels.get(&(row, col)) {
-				Some(&WHITE) => "██",
-				_ => "  ",
-			});
+			eprint!(
+				"{}",
+				match visited_panels.get(&(row, col)) {
+					Some(&WHITE) => "██",
+					_ => "  ",
+				}
+			);
 		}
 		eprintln!();
 	}
@@ -93,7 +80,7 @@ fn run_bot(
 		y: 0,
 		x: 0,
 	};
-	
+
 	// std::fs::create_dir("pics").unwrap();
 
 	loop {
