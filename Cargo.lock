@@ -133,7 +133,7 @@ dependencies = [
 name = "day05"
 version = "0.1.0"
 dependencies = [
- "intcode 0.1.0",
+ "intcode 0.2.0",
 ]
 
 [[package]]
@@ -144,7 +144,7 @@ version = "0.1.0"
 name = "day07"
 version = "0.1.0"
 dependencies = [
- "intcode 0.1.0",
+ "intcode 0.2.0",
  "itertools 0.8.2 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -156,7 +156,7 @@ version = "0.1.0"
 name = "day09"
 version = "0.1.0"
 dependencies = [
- "intcode 0.1.0",
+ "intcode 0.2.0",
 ]
 
 [[package]]
@@ -172,8 +172,13 @@ name = "day11"
 version = "0.1.0"
 dependencies = [
  "image 0.22.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "intcode 0.1.0",
+ "intcode 0.2.0",
 ]
+
+[[package]]
+name = "defaultmap"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "deflate"
@@ -237,7 +242,10 @@ dependencies = [
 
 [[package]]
 name = "intcode"
-version = "0.1.0"
+version = "0.2.0"
+dependencies = [
+ "defaultmap 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
 
 [[package]]
 name = "itertools"
@@ -534,6 +542,7 @@ dependencies = [
 "checksum crossbeam-epoch 0.8.0 (registry+https://github.com/rust-lang/crates.io-index)" = "5064ebdbf05ce3cb95e45c8b086f72263f4166b29b97f6baff7ef7fe047b55ac"
 "checksum crossbeam-queue 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)" = "dfd6515864a82d2f877b42813d4553292c6659498c9a2aa31bab5a15243c2700"
 "checksum crossbeam-utils 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)" = "ce446db02cdc3165b94ae73111e570793400d0794e46125cc4056c81cbb039f4"
+"checksum defaultmap 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)" = "8f17a1a14b082225c6758a7f26bc8af696c4a455e7e3995de5ba2875c18bd804"
 "checksum deflate 0.7.20 (registry+https://github.com/rust-lang/crates.io-index)" = "707b6a7b384888a70c8d2e8650b3e60170dfc6a67bb4aa67b6dfca57af4bedb4"
 "checksum either 1.5.3 (registry+https://github.com/rust-lang/crates.io-index)" = "bb1f6b1ce1c140482ea30ddd3335fc0024ac7ee112895426e0a629a6c20adfe3"
 "checksum gcd 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)" = "c21a76e102bba7724d661dbbba5e483ec0707088be6a01cf3879229e75da4d9f"

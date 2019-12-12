@@ -1,305 +1,88 @@
-#[cfg(test)]
-mod tests {
-	use crate::consts::*;
+use std::{collections::VecDeque, ops::{IndexMut, Index}};
+use defaultmap::DefaultHashMap;
 
-	#[test]
-	fn name_strs() {
-		assert_eq!("ADD", NAMES[ADD as usize]);
-		assert_eq!("MULT", NAMES[MULT as usize]);
-		assert_eq!("INPUT", NAMES[INPUT as usize]);
-		assert_eq!("OUTPUT", NAMES[OUTPUT as usize]);
-		assert_eq!("JUMP_NOT_ZERO", NAMES[JUMP_NOT_ZERO as usize]);
-		assert_eq!("JUMP_IS_ZERO", NAMES[JUMP_IS_ZERO as usize]);
-		assert_eq!("LESS_THAN", NAMES[LESS_THAN as usize]);
-		assert_eq!("EQUAL_TO", NAMES[EQUAL_TO as usize]);
-		assert_eq!("HALT", NAMES[HALT as usize]);
-	}
+type Data = i64; 
+type Indexer = usize;
 
-	mod programs {
-		use crate::{parse_file, parse_program, run};
-
-		#[test]
-		fn add_mul() {
-			let mut program = parse_file("day02.txt").unwrap();
-			let mut program2 = program.clone();
-
-			program[1] = 12;
-			program[2] = 2;
-			let res = run(&mut program, &mut None.into_iter());
-			assert!(res.unwrap().is_empty());
-			assert_eq!(program[0], 3_790_645);
-
-			program2[1] = 65;
-			program2[2] = 77;
-			let res = run(&mut program2, &mut None.into_iter());
-			assert!(res.unwrap().is_empty());
-			assert_eq!(program2[0], 19_690_720);
-		}
-
-		#[test]
-		fn in_out_modes() {
-			let mut program = parse_file("day05.txt").unwrap();
-			let res = run(&mut program, &mut vec![1].into_iter());
-			assert_eq!(&res.unwrap(), &[0, 0, 0, 0, 0, 0, 0, 0, 0, 5_346_030]);
-		}
-
-		#[test]
-		fn jumps() {
-			let mut program = parse_file("day05.txt").unwrap();
-			let res = run(&mut program, &mut vec![5].into_iter());
-			assert_eq!(&res.unwrap(), &[513_116]);
-		}
-
-		#[test]
-		fn not_enough_input() {
-			let mut program = parse_program("3,0").unwrap();
-			let res = run(&mut program, &mut None.into_iter());
-			assert!(res.is_err());
-		}
-	}
+struct IntcodeProgram<M: IndexMut<Indexer, Output=Data>> {
+	mem: M,
+	pc: Option<Indexer>,
+	rel: Data,
 }
 
-use consts::*;
-pub mod consts {
-	pub const ADD: i64 = 1;
-	pub const MULT: i64 = 2;
-	pub const INPUT: i64 = 3;
-	pub const OUTPUT: i64 = 4;
-	pub const JUMP_NOT_ZERO: i64 = 5;
-	pub const JUMP_IS_ZERO: i64 = 6;
-	pub const LESS_THAN: i64 = 7;
-	pub const EQUAL_TO: i64 = 8;
-	pub const ADJUST_REL_BASE: i64 = 9;
-	pub const HALT: i64 = 99;
-
-	#[rustfmt::skip]
-	pub const NAMES: [&str; 100] = [
-		"",
-		"ADD",
-		"MULT",
-		"INPUT",
-		"OUTPUT",
-		"JUMP_NOT_ZERO",
-		"JUMP_IS_ZERO",
-		"LESS_THAN",
-		"EQUAL_TO","ADJUST_REL_BASE",
-		"","","","","","","","","","", // 10-19
-		"","","","","","","","","","", // 20-29
-		"","","","","","","","","","", // 30-39
-		"","","","","","","","","","", // 40-49
-		"","","","","","","","","","", // 50-59
-		"","","","","","","","","","", // 60-69
-		"","","","","","","","","","", // 70-79
-		"","","","","","","","","","", // 80-89
-		"","","","","","","","","","HALT"
-	];
-}
-
-use std::collections::HashMap;
-use std::error::Error;
-type Memory = HashMap<usize, i64>;
-
-pub fn parse_file(filename: &str) -> Result<Memory, Box<dyn Error>> {
-	Ok(parse_program(&std::fs::read_to_string(filename)?))
-}
-
-pub fn parse_program(prog_str: &str) -> Memory {
-	prog_str
-		.trim()
-		.split(',')
-		.map(|n| n.trim().parse().unwrap())
-		.enumerate()
-		.chain(std::iter::once((usize::max_value(), 0)))
-		// .map(|(i, e)| e.map(|val| (e, val)))
-		.collect()
-}
-
-fn opcode_modes(mut instruction: i64) -> (i64, Vec<i64>) {
-	let mut modes = Vec::with_capacity(3);
-	let op = instruction % 100;
-	instruction /= 100;
-	for _ in 0..3 {
-		modes.push(instruction % 10);
-		instruction /= 10;
-	}
-	(op, modes)
-}
-
-/// Runs an intcode program consisting of an array of integers. Takes input as an array of integers
-/// and returns output as an array of integers.
-pub fn run(code: &mut Memory, input: &mut impl Iterator<Item = i64>) -> Result<Vec<i64>, Vec<i64>> {
-	let mut pc = 0;
-	let mut output = Vec::new();
-	loop {
-		let (result, _) = run_once(code, input, &mut output, pc);
-		match result {
-			Ok(Some(new_pc)) => pc = new_pc,
-			Ok(None) => break,
-			Err(e) => {
-				eprintln!("Error `{}` on {} at {}", e, NAMES[code[&pc] as usize], pc);
-				return Err(output);
-			}
-		}
-	}
-	Ok(output)
-}
-
-pub fn run_once(
-	code: &mut Memory,
-	input: &mut impl Iterator<Item = i64>,
-	output: &mut Vec<i64>,
-	pc: usize,
-	// Ok(Some((new pc, consumed input))), Ok(None) = Halted
-) -> (Result<Option<usize>, &'static str>, bool) {
-	let (op, modes) = opcode_modes(code[&pc]);
-	let mut consumed_input = false;
-
-	// A vec of positions in `code`.
-	let posns: Vec<_> = modes
-		.iter()
-		.enumerate()
-		.map(|(i, &mode)| {
-			let pos = pc + i + 1;
-
-			let index = match mode {
-				0 => *code.entry(pos).or_insert(0) as usize,
-				1 => pos,
-				2 => (*code.entry(pos).or_insert(0) + code[&usize::max_value()]) as usize,
-				_ => panic!("Bad mode"),
-			};
-			code.entry(index).or_insert(0);
-			index
-		})
-		.collect();
-
-	// eprintln!("{} {:?} {} {:?} {:?}", pc, &code[pc..pc + 4], op, modes, posns);
-
-	let new_pc = Ok(Some(match op {
-		ADD => {
-			code.insert(posns[2], code[&posns[0]] + code[&posns[1]]);
-			4 + pc
-		}
-		MULT => {
-			code.insert(posns[2], code[&posns[0]] * code[&posns[1]]);
-			4 + pc
-		}
-		INPUT => {
-			code.insert(
-				posns[0],
-				match input.next() {
-					Some(x) => x,
-					None => return (Err("Not enough inputs"), consumed_input),
-				},
-			);
-			consumed_input = true;
-			2 + pc
-		}
-		OUTPUT => {
-			output.push(code[&posns[0]]);
-			2 + pc
-		}
-		JUMP_NOT_ZERO => {
-			if code[&posns[0]] != 0 {
-				code[&posns[1]] as usize
-			} else {
-				pc + 3
-			}
-		}
-		JUMP_IS_ZERO => {
-			if code[&posns[0]] == 0 {
-				code[&posns[1]] as usize
-			} else {
-				pc + 3
-			}
-		}
-		LESS_THAN => {
-			code.insert(
-				posns[2],
-				if code[&posns[0]] < code[&posns[1]] {
-					1
-				} else {
-					0
-				},
-			);
-			4 + pc
-		}
-		EQUAL_TO => {
-			code.insert(
-				posns[2],
-				if code[&posns[0]] == code[&posns[1]] {
-					1
-				} else {
-					0
-				},
-			);
-			4 + pc
-		}
-		ADJUST_REL_BASE => {
-			let rel_base_index = usize::max_value();
-			*code.get_mut(&rel_base_index).unwrap() += code[&posns[0]];
-			2 + pc
-		}
-		HALT => return (Ok(None), consumed_input),
-		_ => return (Err("Invalid instruction"), consumed_input),
-	}));
-	(new_pc, consumed_input)
-}
-
-use std::collections::VecDeque;
-
-#[derive(Debug, Clone)]
-pub struct IntcodeIterator {
-	pub program: Memory,
-	pub pc: Option<usize>,
-	pub input: VecDeque<i64>,
-}
-
-impl IntcodeIterator {
-	pub fn new(program: Memory) -> Self {
-		IntcodeIterator {
-			program,
-			pc: Some(0),
-			input: VecDeque::new(),
-		}
-	}
-	pub fn add_input(&mut self, input: i64) {
-		self.input.push_back(input);
-	}
-	pub fn with_input(mut self, input: i64) -> Self {
-		self.add_input(input);
-		self
-	}
-	pub fn add_input_iter(&mut self, input: impl IntoIterator<Item = i64>) {
-		self.input.extend(input);
-	}
-	pub fn with_input_iter(mut self, input: impl IntoIterator<Item = i64>) -> Self {
-		self.add_input_iter(input);
-		self
-	}
-	pub fn is_halted(&self) -> bool {
-		self.pc.is_none()
-	}
-}
-
-impl Iterator for IntcodeIterator {
-	type Item = i64;
-
+impl<M: IndexMut<Indexer, Output=Data>> Iterator for IntcodeProgram<M> {
+	type Item = Result<Data, IntcodeError>;
 	fn next(&mut self) -> Option<Self::Item> {
-		let mut output = Vec::new();
-		while output.is_empty() {
-			// Returns None when halted
-			self.pc?;
-			let (result, consumed) = run_once(
-				&mut self.program,
-				&mut self.input.get(0).cloned().into_iter(),
-				&mut output,
-				self.pc.unwrap(),
-			);
-			if consumed {
-				self.input.pop_front();
-			}
-			self.pc = result.unwrap();
-		}
-		output.pop()
+		unimplemented!()
 	}
+}
+
+struct HybridMemory {
+	first_chunk: Vec<Data>,
+	rest: DefaultHashMap<Indexer, Data>,
+}
+
+impl HybridMemory {
+	fn new() -> Self {
+		HybridMemory {
+			first_chunk: Vec::new(),
+			rest: DefaultHashMap::default(),
+		}
+	}
+	fn from_program(mut prog: Vec<Data>) -> Self {
+		prog.resize(prog.len() * 2, 0);
+		HybridMemory {
+			first_chunk: prog,
+			rest: DefaultHashMap::default(),
+		}
+	}
+}
+
+impl Index<Indexer> for HybridMemory {
+	type Output = Data;
+	
+	fn index(&self, index: Indexer) -> &Self::Output {
+		if let Some(x) = self.first_chunk.get(index) {
+			x
+		} else {
+			&self.rest[index]
+		}
+	}
+}
+
+impl IndexMut<Indexer> for HybridMemory {
+	fn index_mut(&mut self, index: Indexer) -> &mut Self::Output {
+		if let Some(x) = self.first_chunk.get_mut(index) {
+			x
+		} else {
+			&mut self.rest[index]
+		}
+	}
+}
+
+use std::{str::FromStr, num::ParseIntError};
+impl FromStr for IntcodeProgram<HybridMemory> {
+	type Err = ParseIntError;
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		Ok(IntcodeProgram {
+			mem: HybridMemory::from_str(s)?,
+			pc: Some(0),
+			rel: 0,
+		})
+	}
+}
+
+impl FromStr for HybridMemory {
+	type Err = ParseIntError;
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		s
+			.split(',')
+			.map(|n| n.trim().parse())
+			.collect::<Result<Vec<_>, _>>()
+			.map(Self::from_program)
+	}
+}
+
+enum IntcodeError {
+	NeedsInput,
 }
