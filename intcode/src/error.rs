@@ -1,7 +1,10 @@
 use crate::Data;
+use std::{convert::From, io, num::ParseIntError, error::Error};
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug)]
 pub enum IntcodeError {
+	FileReadError(io::Error),
+	FileParseError(ParseIntError),
 	NeedsInput,
 	InvalidIndex(Data),
 	InvalidMode(Data),
@@ -18,6 +21,8 @@ impl Display for IntcodeError {
 			f,
 			"{}",
 			match self {
+				FileReadError(s) => format!("Could not read file: {}", s),
+				FileParseError(s) => format!("Could not parse file: {}", s),
 				NeedsInput => "Intcode machine is waiting for input".to_owned(),
 				InvalidIndex(d) => format!("Intcode machine received an invalid input: {}", d),
 				InvalidMode(d) => format!("Intcode machine received an invalid mode: {}", d),
@@ -29,5 +34,24 @@ impl Display for IntcodeError {
 	}
 }
 
-use std::error::Error;
-impl Error for IntcodeError {}
+impl Error for IntcodeError {
+	fn source(&self) -> Option<&(dyn Error + 'static)> {
+		match self {
+			FileReadError(s) => Some(s),
+			FileParseError(s) => Some(s),
+			_ => None,
+		}
+	}
+}
+
+impl From<io::Error> for IntcodeError {
+	fn from(error: io::Error) -> Self {
+		Self::FileReadError(error)
+	}
+}
+
+impl From<ParseIntError> for IntcodeError {
+	fn from(error: ParseIntError) -> Self {
+		Self::FileParseError(error)
+	}
+}

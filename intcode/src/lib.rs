@@ -1,6 +1,5 @@
 #![allow(dead_code, unused_mut, unused_variables)]
 
-mod tests;
 mod error;
 use error::IntcodeError::{self, *};
 mod memory;
@@ -11,8 +10,8 @@ use std::{
 	ops::{Index, IndexMut},
 };
 
-type Data = i64;
-type Indexer = usize;
+pub type Data = i64;
+pub type Indexer = usize;
 
 macro_rules! constants {
 	( $( $name:ident = $code:literal; )* ) => {
@@ -41,17 +40,34 @@ constants! {
 pub struct IntcodeProgram<M: IndexMut<Indexer, Output = Data>> {
 	mem: M,
 	pc: Indexer,
-	halted: bool,
 	rel: Data,
 	input: VecDeque<Data>,
+	halted: bool,
+	exploded: bool,
 }
 
+use std::error::Error;
 impl<M: IndexMut<Indexer, Output = Data>> IntcodeProgram<M> {
+	pub fn new(program: M) -> Self {
+		Self {
+			mem: program,
+			pc: 0,
+			rel: 0,
+			input: VecDeque::new(),
+			halted: false,
+			exploded: false,
+		}
+	}
+	
 	pub fn step(&mut self) -> Result<Option<Data>, IntcodeError> {
 		if self.halted {
-			return Err(Halted);
+			return if self.exploded {
+				Err(Exploded)
+			} else {
+				Err(Halted)
+			};
 		}
-		let (arg_indexes, instruction) = self.extract_instruction()?;
+		let (arg_indexes, instruction) = self.separate_instruction()?;
 		
 		let mut output = None;
 		let new_pc = match instruction {
@@ -129,7 +145,7 @@ impl<M: IndexMut<Indexer, Output = Data>> IntcodeProgram<M> {
 		self.input.extend(values);
 	}
 	
-	fn extract_instruction(&self) -> Result<(Vec<usize>, usize), IntcodeError> {
+	fn separate_instruction(&self) -> Result<(Vec<usize>, usize), IntcodeError> {
 		let mut opcode = self[self.pc] as usize;
 		let instruction = opcode % 100;
 		opcode /= 100;
@@ -188,12 +204,12 @@ use std::str::FromStr;
 impl<M: FromStr + IndexMut<Indexer, Output = Data>> FromStr for IntcodeProgram<M> {
 	type Err = M::Err;
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
-		Ok(IntcodeProgram {
-			mem: M::from_str(s)?,
-			pc: 0,
-			halted: false,
-			rel: 0,
-			input: VecDeque::new(),
-		})
+		Ok(Self::new(s.parse()?))
+	}
+}
+
+impl<M: FromStr + IndexMut<Indexer, Output = Data>> IntcodeProgram<M> {
+	pub fn from_file(s: &str) -> Result<Self, IntcodeError>  {
+		std::fs::read_to_string(s)?.parse().into()
 	}
 }
