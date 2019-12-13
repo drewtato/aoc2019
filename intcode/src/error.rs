@@ -1,5 +1,5 @@
 use crate::Data;
-use std::{convert::From, io, num::ParseIntError, error::Error};
+use std::{convert::From, error::Error, io, num::ParseIntError};
 
 #[derive(Debug)]
 pub enum IntcodeError {
@@ -26,7 +26,8 @@ impl Display for IntcodeError {
 				NeedsInput => "Intcode machine is waiting for input".to_owned(),
 				InvalidIndex(d) => format!("Intcode machine received an invalid input: {}", d),
 				InvalidMode(d) => format!("Intcode machine received an invalid mode: {}", d),
-				InvalidInstruction(d) => format!("Intcode machine received an invalid instruction: {}", d),
+				InvalidInstruction(d) =>
+					format!("Intcode machine received an invalid instruction: {}", d),
 				Halted => "Intcode machine has halted".to_owned(),
 				Exploded => "Intode machine has gone kaboom :(".to_owned(),
 			}

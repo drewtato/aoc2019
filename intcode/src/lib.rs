@@ -1,4 +1,4 @@
-#![allow(dead_code, unused_mut, unused_variables)]
+// #![allow(dead_code, unused_mut, unused_variables)]
 
 mod error;
 use error::IntcodeError::{self, *};
@@ -46,7 +46,6 @@ pub struct IntcodeProgram<M: IndexMut<Indexer, Output = Data>> {
 	exploded: bool,
 }
 
-use std::error::Error;
 impl<M: IndexMut<Indexer, Output = Data>> IntcodeProgram<M> {
 	pub fn new(program: M) -> Self {
 		Self {
@@ -58,7 +57,7 @@ impl<M: IndexMut<Indexer, Output = Data>> IntcodeProgram<M> {
 			exploded: false,
 		}
 	}
-	
+
 	pub fn step(&mut self) -> Result<Option<Data>, IntcodeError> {
 		if self.halted {
 			return if self.exploded {
@@ -68,7 +67,7 @@ impl<M: IndexMut<Indexer, Output = Data>> IntcodeProgram<M> {
 			};
 		}
 		let (arg_indexes, instruction) = self.separate_instruction()?;
-		
+
 		let mut output = None;
 		let new_pc = match instruction {
 			ADD => {
@@ -102,11 +101,19 @@ impl<M: IndexMut<Indexer, Output = Data>> IntcodeProgram<M> {
 				}
 			}
 			LES => {
-				self[arg_indexes[2]] = if self[arg_indexes[0]] < self[arg_indexes[1]] { 1 } else { 0 };
+				self[arg_indexes[2]] = if self[arg_indexes[0]] < self[arg_indexes[1]] {
+					1
+				} else {
+					0
+				};
 				self.pc + 4
 			}
 			EQU => {
-				self[arg_indexes[2]] = if self[arg_indexes[0]] == self[arg_indexes[1]] { 1 } else { 0 };
+				self[arg_indexes[2]] = if self[arg_indexes[0]] == self[arg_indexes[1]] {
+					1
+				} else {
+					0
+				};
 				self.pc + 4
 			}
 			ADJ => {
@@ -115,15 +122,15 @@ impl<M: IndexMut<Indexer, Output = Data>> IntcodeProgram<M> {
 			}
 			HLT => {
 				self.halted = true;
-				return Err(Halted)
+				return Err(Halted);
 			}
-			
-			_ => return Err(InvalidInstruction(self[self.pc]))
+
+			_ => return Err(InvalidInstruction(self[self.pc])),
 		};
 		self.pc = new_pc;
 		Ok(output)
 	}
-	
+
 	pub fn with_input(mut self, value: Data) -> Self {
 		self.input.push_back(value);
 		self
@@ -144,7 +151,7 @@ impl<M: IndexMut<Indexer, Output = Data>> IntcodeProgram<M> {
 	{
 		self.input.extend(values);
 	}
-	
+
 	fn separate_instruction(&self) -> Result<(Vec<usize>, usize), IntcodeError> {
 		let mut opcode = self[self.pc] as usize;
 		let instruction = opcode % 100;
@@ -163,7 +170,7 @@ impl<M: IndexMut<Indexer, Output = Data>> IntcodeProgram<M> {
 				Ok(match mode {
 					IMMEDIATE => i + self.pc,
 					POSITION => self[i + self.pc] as usize,
-					RELATIVE => self.rel as usize + self[i + self.pc] as usize,
+					RELATIVE => (self.rel + self[i + self.pc]) as usize,
 					_ => return Err(InvalidMode(self[self.pc])),
 				})
 			})
@@ -188,7 +195,7 @@ impl<M: IndexMut<Indexer, Output = Data>> Iterator for IntcodeProgram<M> {
 
 impl<M: IndexMut<Indexer, Output = Data>> Index<Indexer> for IntcodeProgram<M> {
 	type Output = Data;
-	
+
 	fn index(&self, index: Indexer) -> &Self::Output {
 		self.mem.index(index)
 	}
@@ -208,8 +215,8 @@ impl<M: FromStr + IndexMut<Indexer, Output = Data>> FromStr for IntcodeProgram<M
 	}
 }
 
-impl<M: FromStr + IndexMut<Indexer, Output = Data>> IntcodeProgram<M> {
-	pub fn from_file(s: &str) -> Result<Self, IntcodeError>  {
-		std::fs::read_to_string(s)?.parse().into()
+impl IntcodeProgram<HybridMemory> {
+	pub fn from_file(s: &str) -> Result<Self, IntcodeError> {
+		Ok(std::fs::read_to_string(s)?.parse()?)
 	}
 }
