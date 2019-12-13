@@ -6,6 +6,44 @@ use defaultmap::DefaultHashMap;
 type Data = i64; 
 type Indexer = usize;
 
+macro_rules! instructions {
+	( $( $name:ident = $code:literal; )* ) => {
+		mod Instructions {
+			$(
+				const $name: isize = $code;
+			)*
+		}
+	};
+}
+macro_rules! modes {
+	( $( $name:ident = $code:literal; )* ) => {
+		mod Modes {
+			$(
+				const $name: isize = $code;
+			)*
+		}
+	};
+}
+
+instructions! {
+	ADD = 1;
+	MUL = 2;
+	INP = 3;
+	OUT = 4;
+	JIT = 5;
+	JIF = 6;
+	LES = 7;
+	EQU = 8;
+	ADJ = 9;
+	HLT = 99;
+}
+
+modes! {
+	POSITION = 0;
+	IMMEDIATE = 1;
+	RELATIVE = 2;
+}
+
 pub struct IntcodeProgram<M: IndexMut<Indexer, Output=Data>> {
 	mem: M,
 	pc: Option<Indexer>,
@@ -15,6 +53,8 @@ pub struct IntcodeProgram<M: IndexMut<Indexer, Output=Data>> {
 
 impl<M: IndexMut<Indexer, Output=Data>> IntcodeProgram<M> {
 	pub fn step(&mut self) -> Result<Option<Data>, IntcodeError> {
+		let (args, instruction) = self.extract_instruction();
+		
 		unimplemented!()
 	}
 	pub fn with_input(mut self, value: Data) -> Self {
@@ -31,12 +71,21 @@ impl<M: IndexMut<Indexer, Output=Data>> IntcodeProgram<M> {
 	pub fn add_input_from<I>(&mut self, values: I) where I: IntoIterator<Item=Data> {
 		self.input.extend(values);
 	}
+	fn extract_instruction(&self) -> (Vec<usize>, isize) {
+		unimplemented!()
+	}
 }
 
 impl<M: IndexMut<Indexer, Output=Data>> Iterator for IntcodeProgram<M> {
 	type Item = Result<Data, IntcodeError>;
 	fn next(&mut self) -> Option<Self::Item> {
-		unimplemented!()
+		loop {
+			match self.step() {
+				Ok(Some(o)) => return Some(Ok(o)),
+				Err(e) => return Some(Err(e)),
+				_ => (),
+			}
+		}
 	}
 }
 
@@ -110,6 +159,8 @@ impl FromStr for HybridMemory {
 #[derive(Debug, Copy, Clone)]
 pub enum IntcodeError {
 	NeedsInput,
+	InvalidIndex(Data),
+	Exploded,
 }
 use IntcodeError::*;
 
@@ -117,7 +168,9 @@ use std::fmt::{self, Display, Formatter};
 impl Display for IntcodeError {
 	fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
 		write!(f, "{}", match self {
-			NeedsInput => "Intcode machine is waiting for input.",
+			NeedsInput => "Intcode machine is waiting for input".to_owned(),
+			InvalidIndex(d) => format!("Intcode machine received an invalid input: {}", d),
+			Exploded => "Intode machine has gone kaboom :(".to_owned(),
 		})
 	}
 }
