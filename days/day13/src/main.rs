@@ -1,5 +1,5 @@
 const DAY: u8 = 13;
-use intcode::{IntcodeError, IntcodeProgram};
+use intcode::{IntcodeError, IntcodeProgram, VecMemory};
 
 // const EMPTY: i64 = 0;
 // const WALL: i64 = 1;
@@ -8,7 +8,8 @@ const PADDLE: i64 = 3;
 const BALL: i64 = 4;
 
 fn main() {
-	let program = IntcodeProgram::from_file(format!("inputs/day{:02}.txt", DAY)).unwrap();
+	let program: IntcodeProgram<VecMemory> =
+		IntcodeProgram::from_file(format!("inputs/day{:02}.txt", DAY)).unwrap();
 	let program2 = program.clone();
 
 	let all: Vec<_> = program.collect::<Result<_, IntcodeError>>().unwrap();

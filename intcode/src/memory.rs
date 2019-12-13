@@ -1,11 +1,10 @@
-use crate::{Data, Indexer};
-use defaultmap::DefaultHashMap;
-use std::ops::{Index, IndexMut};
+use crate::{Data, Indexer, IntcodeError};
+use std::{ops::{Index, IndexMut},num::ParseIntError, str::FromStr, iter::FromIterator};
 
 #[derive(Debug, Clone)]
 pub struct HybridMemory {
 	first_chunk: Vec<Data>,
-	rest: DefaultHashMap<Indexer, Data>,
+	rest: HashMap<Indexer, Data>,
 }
 
 impl HybridMemory {
@@ -19,7 +18,7 @@ impl HybridMemory {
 		prog.resize(prog.len() * 2, 0);
 		HybridMemory {
 			first_chunk: prog,
-			rest: DefaultHashMap::default(),
+			rest: HashMap::new(),
 		}
 	}
 }
@@ -28,11 +27,7 @@ impl Index<Indexer> for HybridMemory {
 	type Output = Data;
 
 	fn index(&self, index: Indexer) -> &Self::Output {
-		if let Some(x) = self.first_chunk.get(index) {
-			x
-		} else {
-			&self.rest[index]
-		}
+		self.first_chunk.get(index).unwrap_or_else(|| self.rest.get(&index).unwrap_or(&0))
 	}
 }
 
@@ -41,12 +36,11 @@ impl IndexMut<Indexer> for HybridMemory {
 		if let Some(x) = self.first_chunk.get_mut(index) {
 			x
 		} else {
-			&mut self.rest[index]
+			self.rest.entry(index).or_default()
 		}
 	}
 }
 
-use std::{num::ParseIntError, str::FromStr};
 impl FromStr for HybridMemory {
 	type Err = ParseIntError;
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -55,4 +49,86 @@ impl FromStr for HybridMemory {
 			.collect::<Result<Vec<_>, _>>()
 			.map(Self::from_program)
 	}
+}
+
+impl FromIterator<Data> for HybridMemory {
+	fn from_iter<I: IntoIterator<Item=Data>>(iter: I) -> Self {
+		let mut v: Vec<_> = iter.into_iter().collect();
+		v.resize(v.len() * 2, 0);
+		Self {
+			first_chunk: v,
+			rest: HashMap::new(),
+		}
+	}
+}
+
+#[derive(Debug, Clone)]
+pub struct VecMemory(Vec<Data>);
+
+impl Index<Indexer> for VecMemory {
+	type Output = Data;
+
+	fn index(&self, index: Indexer) -> &Self::Output {
+		self.0.get(index).unwrap_or(&0)
+	}
+}
+
+impl IndexMut<Indexer> for VecMemory {
+	fn index_mut(&mut self, index: Indexer) -> &mut Self::Output {
+		if self.0.get(index).is_none() {
+			self.0.resize(index + 1, 0);
+		}
+		self.0.get_mut(index).unwrap()
+	}
+}
+
+impl FromStr for VecMemory {
+	type Err = ParseIntError;
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		Ok(VecMemory(str_to_collection(s)?))
+	}
+}
+
+use std::collections::HashMap;
+#[derive(Debug, Clone)]
+pub struct HashMemory(HashMap<Indexer, Data>);
+
+impl Index<Indexer> for HashMemory {
+	type Output = Data;
+
+	fn index(&self, index: Indexer) -> &Self::Output {
+		self.0.get(&index).unwrap_or(&0)
+	}
+}
+
+impl IndexMut<Indexer> for HashMemory {
+	fn index_mut(&mut self, index: Indexer) -> &mut Self::Output {
+		self.0.entry(index).or_default()
+	}
+}
+
+impl FromStr for HashMemory {
+	type Err = ParseIntError;
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		Ok(HashMemory(
+			s.split(',')
+				.enumerate()
+				.map(|(i, n)| n.trim().parse().map(|n| (i, n)))
+				.collect::<Result<_, _>>()?,
+		))
+	}
+}
+
+pub fn file_to_collection<P, C>(path: P) -> Result<C, IntcodeError>
+where
+	P: AsRef<std::path::Path>,
+	C: std::iter::FromIterator<Data>,
+{
+	Ok(str_to_collection(&std::fs::read_to_string(path)?)?)
+}
+
+pub fn str_to_collection<C: std::iter::FromIterator<Data>>(s: &str) -> Result<C, ParseIntError> {
+	s.split(',')
+		.map(|n| n.trim().parse())
+		.collect::<Result<C, _>>()
 }

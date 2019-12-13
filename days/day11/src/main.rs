@@ -1,10 +1,10 @@
 const DAY: u8 = 11;
-use intcode::{parse_file, IntcodeIterator};
+use intcode::{IntcodeProgram, HybridMemory, Indexer, Data};
 use std::collections::HashMap;
 
 fn main() {
-	let mut program =
-		IntcodeIterator::new(parse_file(&format!("inputs/day{:02}.txt", DAY)).unwrap());
+	let mut program: IntcodeProgram<HybridMemory> =
+		IntcodeProgram::from_file(&format!("inputs/day{:02}.txt", DAY)).unwrap();
 	let mut program2 = program.clone();
 	// println!("{:?}", program);
 
@@ -18,6 +18,8 @@ fn main() {
 	run_bot(&mut program2, &mut visited_panels);
 
 	print_map(&visited_panels);
+	
+	// For automation
 	println!("GREJALPR");
 }
 
@@ -69,8 +71,8 @@ fn print_map(visited_panels: &HashMap<(isize, isize), i64>) {
 	// *counter += 1;
 }
 
-fn run_bot(
-	program: &mut IntcodeIterator,
+fn run_bot<M: std::ops::IndexMut<Indexer, Output = Data>>(
+	program: &mut IntcodeProgram<M>,
 	visited_panels: &mut HashMap<(isize, isize), i64>,
 ) -> usize {
 	let mut panel_count = 0;
@@ -88,7 +90,7 @@ fn run_bot(
 		let current_panel = visited_panels.entry((robot.y, robot.x)).or_insert(BLACK);
 		program.add_input(*current_panel);
 		if let Some(new_color) = program.next() {
-			*current_panel = new_color;
+			*current_panel = new_color.unwrap();
 			if new_panel {
 				panel_count += 1;
 			}
@@ -96,7 +98,7 @@ fn run_bot(
 			break;
 		}
 		if let Some(turn) = program.next() {
-			match turn {
+			match turn.unwrap() {
 				LEFT => robot.direction = (robot.direction + 3) % 4,
 				RIGHT => robot.direction = (robot.direction + 1) % 4,
 				_ => unreachable!(),

@@ -4,7 +4,7 @@ mod error;
 pub use error::IntcodeError;
 use IntcodeError::*;
 mod memory;
-pub use memory::HybridMemory;
+pub use memory::{file_to_collection, str_to_collection, HashMemory, HybridMemory, VecMemory};
 
 use std::{
 	collections::VecDeque,
@@ -153,6 +153,8 @@ impl<M: IndexMut<Indexer, Output = Data>> IntcodeProgram<M> {
 	{
 		self.input.extend(values);
 	}
+	
+	pub fn is_halted(&self) -> bool { self.halted }
 
 	fn separate_instruction(&self) -> Result<(Vec<usize>, usize), IntcodeError> {
 		let mut opcode = self[self.pc] as usize;
@@ -217,8 +219,10 @@ impl<M: FromStr + IndexMut<Indexer, Output = Data>> FromStr for IntcodeProgram<M
 	}
 }
 
-impl IntcodeProgram<HybridMemory> {
+impl<M: FromStr + IndexMut<Indexer, Output = Data>> IntcodeProgram<M> {
 	pub fn from_file<P: AsRef<std::path::Path>>(path: P) -> Result<Self, IntcodeError> {
-		Ok(std::fs::read_to_string(&path)?.parse()?)
+		Ok(std::fs::read_to_string(&path)?
+			.parse()
+			.map_err(|_| IntcodeError::OtherError)?)
 	}
 }

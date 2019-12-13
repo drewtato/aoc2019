@@ -1,8 +1,8 @@
-use intcode::{parse_file, IntcodeIterator};
+use intcode::{IntcodeProgram, VecMemory};
 use itertools::Itertools;
 
 fn main() {
-	let program = parse_file("inputs/day07.txt").unwrap();
+	let program: IntcodeProgram<VecMemory> = IntcodeProgram::from_file("inputs/day07.txt").unwrap();
 	// use intcode::parse_program;
 	// let program = parse_program(
 	// 	"3,26,1001,26,-4,26,3,27,1002,27,2,27,1,27,26,
@@ -20,8 +20,8 @@ fn main() {
 		.map(|phase_settings| {
 			phase_settings
 				.into_iter()
-				.map(|&p| IntcodeIterator::new(program.clone()).with_input(p))
-				.fold(0, |acc, i| i.with_input(acc).next().unwrap())
+				.map(|&p| IntcodeProgram::new(program.clone()).with_input(p))
+				.fold(0, |acc, i| i.with_input(acc).next().unwrap().unwrap())
 		})
 		.max()
 		.unwrap();
@@ -35,19 +35,19 @@ fn main() {
 		.map(|phase_settings| {
 			let mut amps: Vec<_> = phase_settings
 				.into_iter()
-				.map(|&p| IntcodeIterator::new(program.clone()).with_input(p))
+				.map(|&p| IntcodeProgram::new(program.clone()).with_input(p))
 				.collect();
 
 			(0..5)
 				.cycle()
-				.map(|n| (&mut amps[n]) as *mut IntcodeIterator)
+				.map(|n| (&mut amps[n]) as *mut IntcodeProgram<_>)
 				// Unsafe: We need to check if the machine has halted and run the machine.
 				// We aren't deleting the amps until later, and these operations don't happen at
 				// the same time, so it is safe.
 				.take_while(|&cur| unsafe { !(*cur).is_halted() })
 				.fold(0, |acc, cur| unsafe {
 					(*cur).add_input(acc);
-					(*cur).next().unwrap_or(acc)
+					(*cur).next().unwrap_or(Ok(acc)).unwrap()
 				})
 		})
 		.max()

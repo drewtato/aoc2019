@@ -11,6 +11,7 @@ pub enum IntcodeError {
 	InvalidInstruction(Data),
 	Halted,
 	Exploded,
+	OtherError,
 }
 use IntcodeError::*;
 
@@ -30,6 +31,7 @@ impl Display for IntcodeError {
 					format!("Intcode machine received an invalid instruction: {}", d),
 				Halted => "Intcode machine has halted".to_owned(),
 				Exploded => "Intode machine has gone kaboom :(".to_owned(),
+				OtherError => "Intcode machine encountered an error".to_owned(),
 			}
 		)
 	}
