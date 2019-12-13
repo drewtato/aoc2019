@@ -2,6 +2,7 @@ use crate::{Data, Indexer};
 use defaultmap::DefaultHashMap;
 use std::ops::{Index, IndexMut};
 
+#[derive(Debug, Clone)]
 pub struct HybridMemory {
 	first_chunk: Vec<Data>,
 	rest: DefaultHashMap<Indexer, Data>,

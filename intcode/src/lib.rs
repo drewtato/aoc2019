@@ -1,7 +1,8 @@
 // #![allow(dead_code, unused_mut, unused_variables)]
 
 mod error;
-use error::IntcodeError::{self, *};
+pub use error::IntcodeError;
+use IntcodeError::*;
 mod memory;
 pub use memory::HybridMemory;
 
@@ -37,6 +38,7 @@ constants! {
 	RELATIVE = 2;
 }
 
+#[derive(Debug, Clone)]
 pub struct IntcodeProgram<M: IndexMut<Indexer, Output = Data>> {
 	mem: M,
 	pc: Indexer,
@@ -216,7 +218,7 @@ impl<M: FromStr + IndexMut<Indexer, Output = Data>> FromStr for IntcodeProgram<M
 }
 
 impl IntcodeProgram<HybridMemory> {
-	pub fn from_file(s: &str) -> Result<Self, IntcodeError> {
-		Ok(std::fs::read_to_string(s)?.parse()?)
+	pub fn from_file<P: AsRef<std::path::Path>>(path: P) -> Result<Self, IntcodeError> {
+		Ok(std::fs::read_to_string(&path)?.parse()?)
 	}
 }
