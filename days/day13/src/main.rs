@@ -36,6 +36,7 @@ fn main() {
 
 		// draw_to_screen(&tiles, &mut screen, &mut score, &mut ball, &mut paddle);
 		// print_screen(score, &screen);
+		// std::thread::sleep(std::time::Duration::from_millis(16));
 
 		draw_minimal(&tiles, &mut score, &mut ball, &mut paddle);
 
@@ -119,11 +120,11 @@ fn draw_minimal(
 // }
 
 // fn print_screen(score: i64, screen: &[Vec<i64>]) {
-// 	println!("Score: {}", score);
+// 	let mut output = String::new();
+// 	output.push_str(&format!("Score: {}\n", score));
 // 	for row in screen.iter() {
 // 		for &tile in row.iter() {
-// 			print!(
-// 				"{}",
+// 			output.push_str(
 // 				match tile {
 // 					EMPTY => "  ",
 // 					WALL => "##",
@@ -132,9 +133,10 @@ fn draw_minimal(
 // 					BALL => "()",
 // 					_ => panic!("Bad tile"),
 // 				}
-// 			)
+// 			);
 // 		}
-// 		println!();
+// 		output.push('\n');
 // 	}
-// 	println!();
+// 	output.push('\n');
+// 	print!("{}", output);
 // }
