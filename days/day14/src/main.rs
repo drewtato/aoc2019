@@ -34,12 +34,12 @@ fn main() {
 	
 	let mut guess = (1e12 / ratio) as usize + 1;
 	
-	while find_ore("FUEL", guess, &mut HashMap::new(), &reactions) < 10_usize.pow(12) {
-		println!("Added");
+	while find_ore("FUEL", guess, &mut HashMap::new(), &reactions) <= 10_usize.pow(12) {
+		eprintln!("Added");
 		guess += 2;
 	}
 	while find_ore("FUEL", guess, &mut HashMap::new(), &reactions) > 10_usize.pow(12) {
-		println!("Subbed");
+		eprintln!("Subbed");
 		guess -= 1;
 	}
 	println!("{}", guess);
