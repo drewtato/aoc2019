@@ -29,7 +29,9 @@ fn main() {
 	let mut score = 0;
 	let mut ball = (0, 0);
 	let mut paddle = (0, 0);
+	// let mut iterations = 0;
 	loop {
+		// iterations += 1;
 		let mut tiles = Vec::new();
 		while let Some(Ok(v)) = program.next() {
 			tiles.push(v);
@@ -63,6 +65,7 @@ fn main() {
 			_ => unreachable!(),
 		}
 	}
+	// eprintln!("Iterations: {}", iterations);
 	println!("{}", score);
 }
 
