@@ -79,7 +79,7 @@ fn main() {
 		}
 	}
 	println!("{}", minutes.unwrap());
-	// // print_map(&map);
+	// print_map(&map);
 }
 
 const NORTH: i64 = 1;
