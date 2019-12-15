@@ -44,7 +44,7 @@ fn main() {
 				// Unsafe: We need to check if the machine has halted and run the machine.
 				// We aren't deleting the amps until later, and these operations don't happen at
 				// the same time, so it is safe.
-				.take_while(|&cur| unsafe { !(*cur).is_halted() })
+				.take_while(|&cur| unsafe { !(*cur).halted() })
 				.fold(0, |acc, cur| unsafe {
 					(*cur).add_input(acc);
 					(*cur).next().unwrap_or(Ok(acc)).unwrap()

@@ -5,10 +5,7 @@ fn main() {
 
 	// println!("{:?}", program);
 
-	let end = program.clone()
-		.with_input(1)
-		.last()
-		.unwrap().unwrap();
+	let end = program.clone().with_input(1).last().unwrap().unwrap();
 	println!("{}", end);
 
 	let end = program.with_input(5).last().unwrap().unwrap();

@@ -1,5 +1,5 @@
 const DAY: u8 = 9;
-use intcode::{IntcodeProgram, HybridMemory};
+use intcode::{HybridMemory, IntcodeProgram};
 
 fn main() {
 	let mut program: IntcodeProgram<HybridMemory> =

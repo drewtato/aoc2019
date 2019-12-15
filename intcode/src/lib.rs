@@ -153,27 +153,53 @@ impl<M: IndexMut<Indexer, Output = Data>> IntcodeProgram<M> {
 	{
 		self.input.extend(values);
 	}
-	
-	pub fn is_halted(&self) -> bool { self.halted }
+
+	pub fn halted(&self) -> bool {
+		self.halted
+	}
+
+	pub fn exploded(&self) -> bool {
+		self.exploded
+	}
+
+	pub fn explode(&mut self) {
+		self.exploded = true;
+	}
+
+	pub fn pc(&self) -> Indexer {
+		self.pc
+	}
+
+	pub fn rel(&self) -> Data {
+		self.rel
+	}
+
+	pub fn input(&self) -> &VecDeque<Data> {
+		&self.input
+	}
+
+	pub fn input_mut(&mut self) -> &mut VecDeque<Data> {
+		&mut self.input
+	}
 
 	fn separate_instruction(&self) -> Result<(Vec<usize>, usize), IntcodeError> {
 		let mut opcode = self[self.pc] as usize;
 		let instruction = opcode % 100;
 		opcode /= 100;
-		let mut modes = Vec::with_capacity(4);
+		let mut modes = Vec::with_capacity(3);
 		while opcode > 0 {
 			modes.push(opcode % 10);
 			opcode /= 10;
 		}
-		modes.resize(4, 0);
+		modes.resize(3, 0);
 		let arg_indexes = modes
 			.into_iter()
 			.enumerate()
 			.map(|(mut i, mode)| {
 				i += 1;
 				Ok(match mode {
-					IMMEDIATE => i + self.pc,
 					POSITION => self[i + self.pc] as usize,
+					IMMEDIATE => i + self.pc,
 					RELATIVE => (self.rel + self[i + self.pc]) as usize,
 					_ => return Err(InvalidMode(self[self.pc])),
 				})
@@ -219,9 +245,10 @@ impl<M: FromStr + IndexMut<Indexer, Output = Data>> FromStr for IntcodeProgram<M
 	}
 }
 
+use std::fs::read_to_string;
 impl<M: FromStr + IndexMut<Indexer, Output = Data>> IntcodeProgram<M> {
 	pub fn from_file<P: AsRef<std::path::Path>>(path: P) -> Result<Self, IntcodeError> {
-		Ok(std::fs::read_to_string(&path)?
+		Ok(read_to_string(&path)?
 			.parse()
 			.map_err(|_| IntcodeError::OtherError)?)
 	}

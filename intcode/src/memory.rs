@@ -1,5 +1,10 @@
 use crate::{Data, Indexer, IntcodeError};
-use std::{ops::{Index, IndexMut},num::ParseIntError, str::FromStr, iter::FromIterator};
+use std::{
+	iter::FromIterator,
+	num::ParseIntError,
+	ops::{Index, IndexMut},
+	str::FromStr,
+};
 
 #[derive(Debug, Clone)]
 pub struct HybridMemory {
@@ -27,7 +32,9 @@ impl Index<Indexer> for HybridMemory {
 	type Output = Data;
 
 	fn index(&self, index: Indexer) -> &Self::Output {
-		self.first_chunk.get(index).unwrap_or_else(|| self.rest.get(&index).unwrap_or(&0))
+		self.first_chunk
+			.get(index)
+			.unwrap_or_else(|| self.rest.get(&index).unwrap_or(&0))
 	}
 }
 
@@ -52,7 +59,7 @@ impl FromStr for HybridMemory {
 }
 
 impl FromIterator<Data> for HybridMemory {
-	fn from_iter<I: IntoIterator<Item=Data>>(iter: I) -> Self {
+	fn from_iter<I: IntoIterator<Item = Data>>(iter: I) -> Self {
 		let mut v: Vec<_> = iter.into_iter().collect();
 		v.resize(v.len() * 2, 0);
 		Self {
@@ -62,8 +69,25 @@ impl FromIterator<Data> for HybridMemory {
 	}
 }
 
+use std::fs::read_to_string;
+impl crate::IntcodeProgram<HybridMemory> {
+	pub fn hybrid(s: &str) -> Result<Self, IntcodeError> {
+		Ok(Self::new(s.parse()?))
+	}
+	pub fn hybrid_from_file<P: AsRef<std::path::Path>>(path: P) -> Result<Self, IntcodeError> {
+		Self::hybrid(&read_to_string(path)?)
+	}
+}
+
+
 #[derive(Debug, Clone)]
 pub struct VecMemory(Vec<Data>);
+
+impl crate::IntcodeProgram<VecMemory> {
+	pub fn from_vec(v: Vec<Data>) -> Self {
+		Self::new(VecMemory(v))
+	}
+}
 
 impl Index<Indexer> for VecMemory {
 	type Output = Data;
@@ -122,12 +146,12 @@ impl FromStr for HashMemory {
 pub fn file_to_collection<P, C>(path: P) -> Result<C, IntcodeError>
 where
 	P: AsRef<std::path::Path>,
-	C: std::iter::FromIterator<Data>,
+	C: FromIterator<Data>,
 {
 	Ok(str_to_collection(&std::fs::read_to_string(path)?)?)
 }
 
-pub fn str_to_collection<C: std::iter::FromIterator<Data>>(s: &str) -> Result<C, ParseIntError> {
+pub fn str_to_collection<C: FromIterator<Data>>(s: &str) -> Result<C, ParseIntError> {
 	s.split(',')
 		.map(|n| n.trim().parse())
 		.collect::<Result<C, _>>()

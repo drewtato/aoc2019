@@ -1,5 +1,5 @@
 const DAY: u8 = 11;
-use intcode::{IntcodeProgram, HybridMemory, Indexer, Data};
+use intcode::{Data, HybridMemory, Indexer, IntcodeProgram};
 use std::collections::HashMap;
 
 fn main() {
@@ -18,7 +18,7 @@ fn main() {
 	run_bot(&mut program2, &mut visited_panels);
 
 	print_map(&visited_panels);
-	
+
 	// For automation
 	println!("GREJALPR");
 }
