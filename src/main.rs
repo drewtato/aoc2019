@@ -11,7 +11,7 @@ const TEMPLATE: &[u8] = br#"
 use std::fs::read_to_string;
 
 fn main() {
-	let input: Vec<Vec<isize>> = read_to_string(format!("inputs/day{:02}.txt", DAY))
+	let input: Vec<Vec<isize>> = read_to_string(DAY)
 		.unwrap()
 		.trim()
 		.lines()
@@ -38,7 +38,7 @@ fn main() -> ResultBox<()> {
 
 		let mut source = fs::File::create(format!("{}/src/main.rs", code_dir)).unwrap();
 		source
-			.write_all(format!("const DAY: u8 = {};", day).as_bytes())
+			.write_all(format!(r#"const DAY: &str = "inputs/day{:02}.txt";"#, day).as_bytes())
 			.unwrap();
 		source.write_all(TEMPLATE).unwrap();
 	} else {

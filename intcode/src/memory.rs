@@ -72,10 +72,10 @@ impl FromIterator<Data> for HybridMemory {
 use std::fs::read_to_string;
 impl crate::IntcodeProgram<HybridMemory> {
 	pub fn hybrid(s: &str) -> Result<Self, IntcodeError> {
-		Ok(Self::new(s.parse()?))
+		Ok(s.parse()?)
 	}
 	pub fn hybrid_from_file<P: AsRef<std::path::Path>>(path: P) -> Result<Self, IntcodeError> {
-		Self::hybrid(&read_to_string(path)?)
+		Ok(read_to_string(path)?.parse()?)
 	}
 }
 
@@ -86,6 +86,9 @@ pub struct VecMemory(Vec<Data>);
 impl crate::IntcodeProgram<VecMemory> {
 	pub fn from_vec(v: Vec<Data>) -> Self {
 		Self::new(VecMemory(v))
+	}
+	pub fn vec_from_file<P: AsRef<std::path::Path>>(path: P) -> Result<Self, IntcodeError> {
+		Ok(read_to_string(path)?.parse()?)
 	}
 }
 
