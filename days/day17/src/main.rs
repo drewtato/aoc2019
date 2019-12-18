@@ -2,8 +2,7 @@ const DAY: u8 = 17;
 use intcode::IntcodeProgram;
 
 fn main() {
-	let mut program =
-		IntcodeProgram::vec_from_file(format!("inputs/day{:02}.txt", DAY)).unwrap();
+	let mut program = IntcodeProgram::vec_from_file(format!("inputs/day{:02}.txt", DAY)).unwrap();
 
 	program[0] = 2;
 	let input = b"A,B,A,C,A,B,C,B,C,A\nL,12,R,4,R,4,L,6\nL,12,R,4,R,4,R,12\nL,10,L,6,R,4\nn\n"

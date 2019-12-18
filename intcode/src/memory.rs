@@ -6,6 +6,8 @@ use std::{
 	str::FromStr,
 };
 
+pub trait Memory: IndexMut<Indexer, Output = Data> {}
+
 #[derive(Debug, Clone)]
 pub struct HybridMemory {
 	first_chunk: Vec<Data>,
@@ -47,6 +49,8 @@ impl IndexMut<Indexer> for HybridMemory {
 		}
 	}
 }
+
+impl Memory for HybridMemory {}
 
 impl FromStr for HybridMemory {
 	type Err = ParseIntError;
@@ -109,6 +113,8 @@ impl IndexMut<Indexer> for VecMemory {
 	}
 }
 
+impl Memory for VecMemory {}
+
 impl FromStr for VecMemory {
 	type Err = ParseIntError;
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -133,6 +139,8 @@ impl IndexMut<Indexer> for HashMemory {
 		self.0.entry(index).or_default()
 	}
 }
+
+impl Memory for HashMemory {}
 
 impl FromStr for HashMemory {
 	type Err = ParseIntError;
