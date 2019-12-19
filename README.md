@@ -7,6 +7,8 @@ A repo of solutions to the 25 days of [Advent of Code](https://adventofcode.com)
 ```text
       -------Part 1--------   -------Part 2--------
 Day       Time  Rank  Score       Time  Rank  Score
+ 19   00:05:39   241      0   00:44:44   285      0
+ 17   00:35:10  1150      0   01:47:06   604      0
  16   00:33:43   896      0   01:10:21   105      0
  15   01:32:47   693      0   01:43:47   553      0
  14   01:34:21   793      0   01:48:05   609      0
@@ -27,30 +29,30 @@ Day       Time  Rank  Score       Time  Rank  Score
 
 ## Daily Notes
 
-[Day 1](notes/day01.md)  
-[Day 2](notes/day02.md)  
-[Day 3](notes/day03.md)  
-[Day 4](notes/day04.md)  
-[Day 5](notes/day05.md)  
-[Day 6](notes/day06.md)  
-[Day 7](notes/day07.md)  
-[Day 8](notes/day08.md)  
-[Day 9](notes/day09.md)  
-[Day 10](notes/day10.md)  
-[Day 11](notes/day11.md)  
-[Day 12](notes/day12.md)  
-[Day 13](notes/day13.md)  
-[Day 14](notes/day14.md)  
-[Day 15](notes/day15.md)  
-[Day 16](notes/day16.md)  
+[Day 1](notes/day01.md)
+[Day 2](notes/day02.md)
+[Day 3](notes/day03.md)
+[Day 4](notes/day04.md)
+[Day 5](notes/day05.md)
+[Day 6](notes/day06.md)
+[Day 7](notes/day07.md)
+[Day 8](notes/day08.md)
+[Day 9](notes/day09.md)
+[Day 10](notes/day10.md)
+[Day 11](notes/day11.md)
+[Day 12](notes/day12.md)
+[Day 13](notes/day13.md)
+[Day 14](notes/day14.md)
+[Day 15](notes/day15.md)
+[Day 16](notes/day16.md)
+[Day 17](notes/day17.md)
+[Day 19](notes/day19.md)
 <!--
-[Day 17](notes/day17.md)  
-[Day 18](notes/day18.md)  
-[Day 19](notes/day19.md)  
-[Day 20](notes/day20.md)  
-[Day 21](notes/day21.md)  
-[Day 22](notes/day22.md)  
-[Day 23](notes/day23.md)  
-[Day 24](notes/day24.md)  
+[Day 18](notes/day18.md)
+[Day 20](notes/day20.md)
+[Day 21](notes/day21.md)
+[Day 22](notes/day22.md)
+[Day 23](notes/day23.md)
+[Day 24](notes/day24.md)
 [Day 25](notes/day25.md)
 -->
