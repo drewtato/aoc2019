@@ -66,7 +66,7 @@ fn main() {
 	let distances = distances.iter().map(|d| d.unwrap()).collect::<Vec<_>>();
 	println!("{:?}", distances);
 	let all_key_cost: usize = distances.iter().sum();
-	
+
 	tunnels[entrance.0][entrance.1] = PATH;
 
 	let first = Searcher::start(entrance.0, entrance.1, all_key_cost);
@@ -77,7 +77,7 @@ fn main() {
 		.iter()
 		.map(|row| row.iter().map(|_| HashMap::new()).collect())
 		.collect();
-	
+
 	while let Some(mut search) = heap.pop() {
 		search.dist_from_last_key += 1;
 		search.current_cost += 1;
@@ -85,7 +85,7 @@ fn main() {
 			let mut search: Searcher = search.clone();
 			let (ny, nx) = (
 				(search.y as isize + dy) as usize,
-				(search.x as isize + dx) as usize
+				(search.x as isize + dx) as usize,
 			);
 			match tunnels[ny][nx] {
 				WALL => continue,
@@ -135,7 +135,14 @@ struct Searcher {
 }
 
 impl Searcher {
-	fn new(y: usize, x: usize, dist: usize, left: usize, current: usize, collected: [bool; LETTER_COUNT]) -> Self {
+	fn new(
+		y: usize,
+		x: usize,
+		dist: usize,
+		left: usize,
+		current: usize,
+		collected: [bool; LETTER_COUNT],
+	) -> Self {
 		Self {
 			y,
 			x,
@@ -151,9 +158,13 @@ impl Searcher {
 	}
 
 	fn heuristic(&self) -> usize {
-		self.current_cost + self.left_key_cost.checked_sub(self.dist_from_last_key).unwrap_or(0)
+		self.current_cost
+			+ self
+				.left_key_cost
+				.checked_sub(self.dist_from_last_key)
+				.unwrap_or(0)
 	}
-	
+
 	fn adjust_cost(&mut self, key: u8, distances: &[usize]) {
 		self.left_key_cost -= distances[key as usize];
 	}
