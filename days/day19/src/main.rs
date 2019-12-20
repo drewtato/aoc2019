@@ -6,7 +6,7 @@ fn main() {
 
 	// println!("{:?}", program);
 	let mut sum = 0;
-	
+
 	for y in 0..50 {
 		for x in 0..50 {
 			let output = check(&program, (x, y));
@@ -16,7 +16,7 @@ fn main() {
 		// println!();
 	}
 	println!("{}", sum);
-	
+
 	let mut top = (100, 0);
 	let bottom = |top: (i64, i64)| (top.0 - 99, top.1 + 99);
 	while check(&program, bottom(top)) == 0 {
@@ -29,7 +29,13 @@ fn main() {
 }
 
 fn check<T: Memory + Clone>(program: &IntcodeProgram<T>, coords: (i64, i64)) -> i64 {
-	program.clone().with_input(coords.0).with_input(coords.1).next().unwrap().unwrap()
+	program
+		.clone()
+		.with_input(coords.0)
+		.with_input(coords.1)
+		.next()
+		.unwrap()
+		.unwrap()
 }
 
 // fn print_area<T: Memory + Clone>(program: &IntcodeProgram<T>, coords: (i64, i64), radius: i64) {
