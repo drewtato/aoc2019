@@ -1,7 +1,7 @@
 #![allow(unused_imports, dead_code, unused_variables, unused_mut)]
 
 const DAY: &str = "inputs/day20.txt";
-use std::collections::{HashMap, VecDeque, BinaryHeap};
+use std::collections::{BinaryHeap, HashMap, VecDeque};
 use std::fs::read_to_string;
 
 fn main() {
@@ -70,19 +70,17 @@ fn main() {
 
 	let begin = portal_to_coord[&[b'A'; 2]];
 	let goal = portal_to_coord[&[b'Z'; 2]];
-	
+
 	let mut queue: BinaryHeap<(isize, isize, (usize, usize))> = BinaryHeap::new();
 	queue.push((0, 0, begin));
-	
+
 	let mut visited: HashMap<((usize, usize), isize), isize> = HashMap::new();
 	visited.insert((begin, 0), 0);
 
 	let cost = 'a: loop {
-		let (cost, level, (y, x)) = queue
-			.pop()
-			.unwrap_or_else(|| panic!("No path to exit"));
+		let (cost, level, (y, x)) = queue.pop().unwrap_or_else(|| panic!("No path to exit"));
 		// println!("{:?} {}", (y, x), cost);
-		
+
 		for &(dy, dx) in NEIGHBORS.iter() {
 			let mut new = ((y as isize + dy) as usize, (x as isize + dx) as usize);
 			let mut level = level;
@@ -110,18 +108,18 @@ fn main() {
 				}
 				_ => unreachable!(),
 			}
-			
+
 			if let Some(&c) = visited.get(&(new, level)) {
 				if c >= cost {
 					continue;
 				}
 			}
 			visited.insert((new, level), cost);
-			
+
 			if new == goal && level == 0 {
 				break 'a -cost + 1;
 			}
-			
+
 			queue.push((cost - 1, level, new));
 		}
 	};

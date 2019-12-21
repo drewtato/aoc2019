@@ -230,6 +230,13 @@ name = "day20"
 version = "0.1.0"
 
 [[package]]
+name = "day21"
+version = "0.1.0"
+dependencies = [
+ "intcode 0.2.0",
+]
+
+[[package]]
 name = "deflate"
 version = "0.7.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -478,6 +485,13 @@ dependencies = [
  "crossbeam-utils 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "lazy_static 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "num_cpus 1.11.1 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "runner"
+version = "0.1.0"
+dependencies = [
+ "intcode 0.2.0",
 ]
 
 [[package]]
