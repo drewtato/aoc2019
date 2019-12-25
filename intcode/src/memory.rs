@@ -85,7 +85,7 @@ impl crate::IntcodeProgram<HybridMemory> {
 
 
 #[derive(Debug, Clone)]
-pub struct VecMemory(Vec<Data>);
+pub struct VecMemory(pub Vec<Data>);
 
 impl crate::IntcodeProgram<VecMemory> {
 	pub fn from_vec(v: Vec<Data>) -> Self {

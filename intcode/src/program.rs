@@ -175,6 +175,14 @@ impl<M: Memory> IntcodeProgram<M> {
 	pub fn input_mut(&mut self) -> &mut VecDeque<Data> {
 		&mut self.input
 	}
+	
+	pub fn memory(&self) -> &M {
+		&self.mem
+	}
+	
+	pub fn memory_mut(&mut self) -> &mut M {
+		&mut self.mem
+	}
 
 	fn separate_instruction(&self) -> Result<(Vec<usize>, usize), IntcodeError> {
 		let mut opcode = self[self.pc] as usize;
